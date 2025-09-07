@@ -154,8 +154,8 @@ export default function Cooperativas() {
                       href={`/cooperativas/${cooperative.id}`}
                       className="card-aca hover:shadow-lg transition-all duration-200 cursor-pointer group"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0 overflow-hidden">
                           {/* Nombre y estado */}
                           <div className="flex items-center justify-between mb-3">
                             <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -202,18 +202,12 @@ export default function Cooperativas() {
                           </div>
 
                           {/* Información adicional */}
-                          <div className="flex items-center space-x-6 text-sm text-gray-600">
-                            <div className="flex items-center">
-                              <span className="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                              <span className="font-medium">Presidente:</span>
-                              <span className="ml-1 font-semibold text-blue-600">
+                          <div className="text-sm text-gray-600 mt-3">
+                            <div className="ml-6 mb-1">
+                              <span className="font-medium text-gray-700">👤 Presidente: </span>
+                              <span className="font-semibold text-blue-600">
                                 {cooperative.president || 'No especificado'}
                               </span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                              <span className="font-medium">Estado:</span>
-                              <span className="ml-1 font-semibold text-green-600">Activa</span>
                             </div>
                           </div>
                         </div>

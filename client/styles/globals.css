@@ -166,6 +166,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .card-aca:hover {
@@ -178,6 +180,8 @@ body {
   margin-bottom: 15px;
   font-size: 1.2em;
   font-weight: 600;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Formularios ACA */
