@@ -1,7 +1,7 @@
 {
   "name": "cooperativas-admin",
   "version": "1.0.0",
-  "description": "Sistema de gestión de cooperativas para ACA",
+  "description": "Sistema de gestión de cooperativas para la Asociación de Cooperativas Argentinas (ACA)",
   "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -18,7 +18,7 @@
     "nodejs",
     "nextjs"
   ],
-  "author": "ACA Cooperativas",
+  "author": "Asociación de Cooperativas Argentinas",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"

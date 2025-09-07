@@ -1,8 +1,9 @@
+````markdown
 # Sistema de Gestión de Cooperativas
 
 ## MVP - Minimum Viable Product
 
-Este es un sistema de gestión para las 134 cooperativas de ACA.
+Este es un sistema de gestión para las 134 cooperativas de la **Asociación de Cooperativas Argentinas (ACA)**.
 
 ### Características del MVP:
 - Frontend: React con NextJS (mobile-first)
@@ -27,3 +28,4 @@ Este es un sistema de gestión para las 134 cooperativas de ACA.
 npm run install-all
 npm run dev
 ```
+````

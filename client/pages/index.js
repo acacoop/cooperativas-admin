@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -14,10 +14,15 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-aca-blue"></div>
+        <div className="spinner-aca"></div>
       </div>
     );
   }
@@ -34,49 +39,54 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-aca-blue">
-                Sistema ACA Cooperativas
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                Bienvenido, {user.username}
-              </span>
-              <span className="px-2 py-1 bg-aca-blue text-white text-xs rounded">
-                {user.role === 'admin_aca' ? 'Admin ACA' : 
-                 user.role === 'operador_aca' ? 'Operador ACA' : 
-                 'Admin Cooperativa'}
-              </span>
-            </div>
+      <div className="container-aca">
+        {/* Header ACA */}
+        <div className="header-aca">
+          <div className="aca-brand">
+            <div className="aca-logo">ACA</div>
+            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
+          </div>
+          <h1>Sistema de Gestión de Cooperativas</h1>
+          <h2>Dashboard Principal</h2>
+          
+          {/* Información del usuario */}
+          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
+            <span className="text-sm">
+              Bienvenido, <strong>{user.username}</strong>
+            </span>
+            <span className="px-3 py-1 bg-orange-500 text-white text-xs rounded-full">
+              {user.role === 'admin_aca' ? 'Admin ACA' : 
+               user.role === 'operador_aca' ? 'Operador ACA' : 
+               'Admin Cooperativa'}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-orange-200 hover:text-white transition-colors"
+            >
+              Salir
+            </button>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Dashboard Principal
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Contenido principal */}
+        <main className="p-6">
+          {/* Cards de acciones principales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* Card para ver cooperativas */}
-            <Link href="/cooperativas" className="card hover:shadow-lg transition-shadow cursor-pointer">
+            <Link href="/cooperativas" className="card-aca group cursor-pointer">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-aca-blue rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                  🏢
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                     Cooperativas
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-600">
                     Gestionar datos de cooperativas
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    134 cooperativas registradas
                   </p>
                 </div>
               </div>
@@ -84,19 +94,20 @@ export default function Home() {
 
             {/* Card para cambios pendientes (solo admin ACA) */}
             {user.role === 'admin_aca' && (
-              <Link href="/cambios-pendientes" className="card hover:shadow-lg transition-shadow cursor-pointer">
+              <Link href="/cambios-pendientes" className="card-aca group cursor-pointer">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl">
+                    ⏰
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
                       Cambios Pendientes
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600">
                       Aprobar modificaciones
+                    </p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      Revisión requerida
                     </p>
                   </div>
                 </div>
@@ -105,19 +116,20 @@ export default function Home() {
 
             {/* Card para mi cooperativa (solo admin cooperativa) */}
             {user.role === 'admin_coop' && (
-              <Link href={`/cooperativas/${user.cooperative_id}`} className="card hover:shadow-lg transition-shadow cursor-pointer">
+              <Link href={`/cooperativas/${user.cooperative_id}`} className="card-aca group cursor-pointer">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-aca-green rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                    👤
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
                       Mi Cooperativa
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600">
                       Actualizar información
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Acceso directo
                     </p>
                   </div>
                 </div>
@@ -125,51 +137,100 @@ export default function Home() {
             )}
 
             {/* Card para reportes */}
-            <div className="card">
+            <div className="card-aca opacity-75">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                  📊
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     Reportes
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-600">
+                    Estadísticas y análisis
+                  </p>
+                  <p className="text-xs text-purple-600 mt-1">
                     Próximamente disponible
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Card para configuración (solo admin ACA) */}
+            {user.role === 'admin_aca' && (
+              <div className="card-aca opacity-75">
+                <div className="flex items-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                    ⚙️
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Configuración
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Gestión del sistema
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Próximamente disponible
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Estadísticas rápidas */}
-          <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Información General
+          <div className="card-aca">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              📈 Información General del Sistema
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="card text-center">
-                <div className="text-2xl font-bold text-aca-blue">134</div>
-                <div className="text-sm text-gray-500">Cooperativas Totales</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-3xl font-bold text-blue-600 mb-2">134</div>
+                <div className="text-sm font-medium text-blue-800">Cooperativas</div>
+                <div className="text-xs text-blue-600">Total registradas</div>
               </div>
-              <div className="card text-center">
-                <div className="text-2xl font-bold text-aca-green">7</div>
-                <div className="text-sm text-gray-500">Regiones (CAR)</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-3xl font-bold text-green-600 mb-2">7</div>
+                <div className="text-sm font-medium text-green-800">Regiones CAR</div>
+                <div className="text-xs text-green-600">Centros de distribución</div>
               </div>
-              <div className="card text-center">
-                <div className="text-2xl font-bold text-purple-600">Active</div>
-                <div className="text-sm text-gray-500">Estado Sistema</div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="text-3xl font-bold text-orange-600 mb-2">✓</div>
+                <div className="text-sm font-medium text-orange-800">Sistema Activo</div>
+                <div className="text-xs text-orange-600">Funcionando correctamente</div>
               </div>
-              <div className="card text-center">
-                <div className="text-2xl font-bold text-orange-500">MVP</div>
-                <div className="text-sm text-gray-500">Versión Actual</div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="text-3xl font-bold text-purple-600 mb-2">MVP</div>
+                <div className="text-sm font-medium text-purple-800">Versión Actual</div>
+                <div className="text-xs text-purple-600">Producto mínimo viable</div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
+
+          {/* Información adicional para diferentes roles */}
+          {user.role === 'admin_aca' && (
+            <div className="alert-aca alert-info mt-6">
+              <strong>👑 Administrador ACA:</strong> Tienes acceso completo al sistema. 
+              Puedes gestionar todas las cooperativas, aprobar cambios y administrar usuarios.
+            </div>
+          )}
+
+          {user.role === 'operador_aca' && (
+            <div className="alert-aca alert-info mt-6">
+              <strong>🔧 Operador ACA:</strong> Puedes consultar información de cooperativas 
+              y asistir en tareas operativas del sistema.
+            </div>
+          )}
+
+          {user.role === 'admin_coop' && (
+            <div className="alert-aca alert-success mt-6">
+              <strong>🏢 Administrador de Cooperativa:</strong> Puedes actualizar la información 
+              de tu cooperativa. Los cambios serán revisados por ACA antes de ser aplicados.
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

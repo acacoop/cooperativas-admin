@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useAuth } from '../utils/AuthContext';
-import { cooperativesAPI } from '../utils/api';
+import { useAuth } from '../../utils/AuthContext';
+import { cooperativesAPI } from '../../utils/api';
 
 export default function Cooperativas() {
   const [cooperatives, setCooperatives] = useState([]);
@@ -41,6 +41,11 @@ export default function Cooperativas() {
     coop.cuit.includes(searchTerm)
   );
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   if (!user) return null;
 
   return (
@@ -49,126 +54,187 @@ export default function Cooperativas() {
         <title>Cooperativas - Sistema ACA</title>
       </Head>
 
-      {/* Header */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-aca-blue hover:text-blue-700">
-                ← Sistema ACA Cooperativas
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">{user.username}</span>
-              <button
-                onClick={logout}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                Salir
-              </button>
-            </div>
+      <div className="container-aca">
+        {/* Header ACA */}
+        <div className="header-aca">
+          <Link href="/" className="btn-back">
+            ← Volver al Dashboard
+          </Link>
+          
+          <div className="aca-brand">
+            <div className="aca-logo">ACA</div>
+            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
+          </div>
+          <h1>Gestión de Cooperativas</h1>
+          <h2>Listado Completo - {filteredCooperatives.length} Cooperativas</h2>
+          
+          {/* Información del usuario */}
+          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
+            <span className="text-sm">{user.username}</span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-orange-200 hover:text-white transition-colors"
+            >
+              Salir
+            </button>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Cooperativas
-            </h1>
-            <div className="text-sm text-gray-500">
-              Total: {filteredCooperatives.length} cooperativas
-            </div>
-          </div>
-
+        {/* Contenido principal */}
+        <main className="p-6">
           {/* Buscador */}
-          <div className="mb-6">
-            <div className="relative">
+          <div className="card-aca mb-6">
+            <h3 className="mb-4">🔍 Buscar Cooperativas</h3>
+            <div className="form-group-aca">
               <input
                 type="text"
                 placeholder="Buscar por nombre, código o CUIT..."
-                className="input-field pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
               />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
+            </div>
+            <div className="text-sm text-gray-600 mt-2">
+              💡 Puedes buscar por nombre, código de cooperativa o número de CUIT
             </div>
           </div>
 
+          {/* Estado de carga */}
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aca-blue"></div>
+            <div className="card-aca text-center py-12">
+              <div className="spinner-aca mb-4"></div>
+              <p className="text-gray-600">Cargando cooperativas...</p>
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+            <div className="alert-aca alert-error">
               {error}
             </div>
           ) : (
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul className="divide-y divide-gray-200">
-                {filteredCooperatives.map((cooperative) => (
-                  <li key={cooperative.id}>
-                    <Link 
-                      href={`/cooperativas/${cooperative.id}`}
-                      className="block hover:bg-gray-50 px-4 py-4 sm:px-6"
+            <>
+              {/* Estadísticas */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="card-aca text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-2">{filteredCooperatives.length}</div>
+                  <div className="text-sm font-medium text-gray-700">Cooperativas Mostradas</div>
+                </div>
+                <div className="card-aca text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-2">{cooperatives.length}</div>
+                  <div className="text-sm font-medium text-gray-700">Total Registradas</div>
+                </div>
+                <div className="card-aca text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-2">7</div>
+                  <div className="text-sm font-medium text-gray-700">Regiones CAR</div>
+                </div>
+              </div>
+
+              {/* Lista de cooperativas */}
+              {filteredCooperatives.length === 0 ? (
+                <div className="card-aca text-center py-12">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                    No se encontraron cooperativas
+                  </h3>
+                  <p className="text-gray-600">
+                    Intenta con otros términos de búsqueda o verifica que hayas escrito correctamente.
+                  </p>
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="btn-aca mt-4"
                     >
-                      <div className="flex items-center justify-between">
+                      Limpiar búsqueda
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredCooperatives.map((cooperative) => (
+                    <Link 
+                      key={cooperative.id}
+                      href={`/cooperativas/${cooperative.id}`}
+                      className="card-aca hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                    >
+                      <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium text-aca-blue truncate">
+                          {/* Nombre y estado */}
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                               {cooperative.name}
-                            </p>
-                            <div className="ml-2 flex-shrink-0 flex">
-                              <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Activa
-                              </p>
+                            </h3>
+                            <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                              ✓ Activa
+                            </span>
+                          </div>
+
+                          {/* Información principal */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                            <div className="flex items-center">
+                              <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-semibold mr-3">
+                                #{cooperative.code}
+                              </span>
+                              <div>
+                                <div className="text-sm font-medium text-gray-700">Código</div>
+                                <div className="text-sm text-gray-600">{cooperative.code}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center">
+                              <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-sm mr-3">
+                                🏢
+                              </span>
+                              <div>
+                                <div className="text-sm font-medium text-gray-700">CUIT</div>
+                                <div className="text-sm text-gray-600">{cooperative.cuit}</div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center">
+                              <span className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm mr-3">
+                                📍
+                              </span>
+                              <div>
+                                <div className="text-sm font-medium text-gray-700">CAR</div>
+                                <div className="text-sm text-gray-600">
+                                  {cooperative.car_name || `Región ${cooperative.car}`}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="mt-2 sm:flex sm:justify-between">
-                            <div className="sm:flex">
-                              <p className="text-sm text-gray-500">
-                                Código: {cooperative.code}
-                              </p>
-                              <p className="mt-2 text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                                CUIT: {cooperative.cuit}
-                              </p>
+
+                          {/* Información adicional */}
+                          <div className="flex items-center space-x-6 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <span className="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                              <span className="font-medium">Presidente:</span>
+                              <span className="ml-1 font-semibold text-blue-600">
+                                {cooperative.president || 'No especificado'}
+                              </span>
                             </div>
-                            <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                              <p>
-                                CAR: {cooperative.car_name || `Región ${cooperative.car}`}
-                              </p>
+                            <div className="flex items-center">
+                              <span className="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                              <span className="font-medium">Estado:</span>
+                              <span className="ml-1 font-semibold text-green-600">Activa</span>
                             </div>
-                          </div>
-                          <div className="mt-2 text-sm text-gray-500">
-                            <span className="mr-4">Votos: {cooperative.votes}</span>
-                            <span>Suplentes: {cooperative.substitutes}</span>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+
+                        {/* Icono de flecha */}
+                        <div className="ml-4 flex-shrink-0">
+                          <span className="w-8 h-8 bg-gray-100 group-hover:bg-blue-100 rounded-full flex items-center justify-center transition-colors">
+                            <svg className="w-4 h-4 text-gray-600 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
                         </div>
                       </div>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-              
-              {filteredCooperatives.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">No se encontraron cooperativas que coincidan con la búsqueda.</p>
+                  ))}
                 </div>
               )}
-            </div>
+            </>
           )}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

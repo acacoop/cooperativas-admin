@@ -44,84 +44,84 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Head>
         <title>Login - Sistema ACA Cooperativas</title>
       </Head>
       
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sistema de Gestión de Cooperativas
-          </h2>
-          <h3 className="mt-2 text-center text-xl text-aca-blue font-semibold">
-            ACA - Asociación de Cooperativas Argentinas
-          </h3>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Ingresa tus credenciales para acceder
-          </p>
+      {/* Header ACA */}
+      <div className="header-aca">
+        <div className="aca-brand">
+          <div className="aca-logo">ACA</div>
+          <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Usuario
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="input-field mt-1"
-                placeholder="Ingresa tu usuario"
-                value={credentials.username}
-                onChange={handleChange}
-              />
-            </div>
+        <h1>Sistema de Gestión de Cooperativas</h1>
+        <h2>Acceso Administradores</h2>
+      </div>
+
+      {/* Contenido principal */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          {/* Formulario de login */}
+          <div className="card-aca">
+            <h3 className="text-center mb-6">Iniciar Sesión</h3>
             
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="input-field mt-1"
-                placeholder="Ingresa tu contraseña"
-                value={credentials.password}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
+            {error && (
+              <div className="alert-aca alert-error mb-4">
+                {error}
+              </div>
+            )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-aca-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aca-blue disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : null}
-              {loading ? 'Ingresando...' : 'Ingresar'}
-            </button>
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="form-group-aca">
+                <label htmlFor="username">Usuario</label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  placeholder="Ingresa tu usuario"
+                  value={credentials.username}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
 
-          <div className="mt-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <h4 className="font-medium text-blue-900 mb-2">Usuarios de Prueba (MVP):</h4>
+              <div className="form-group-aca">
+                <label htmlFor="password">Contraseña</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Ingresa tu contraseña"
+                  value={credentials.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn-aca w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="spinner-aca mr-2"></div>
+                    Ingresando...
+                  </div>
+                ) : (
+                  'Ingresar'
+                )}
+              </button>
+            </form>
+
+            {/* Información de usuarios de prueba */}
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+              <h4 className="font-semibold text-blue-800 mb-2">
+                👥 Usuarios de Prueba (MVP)
+              </h4>
               <div className="text-sm text-blue-700 space-y-1">
                 <div><strong>Admin ACA:</strong> admin_aca / admin123</div>
                 <div><strong>Operador ACA:</strong> operador_aca / operador123</div>
@@ -129,8 +129,13 @@ export default function Login() {
               </div>
             </div>
           </div>
-        </form>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white text-center py-4">
+        <p>&copy; 2025 Asociación de Cooperativas Argentinas - Sistema de Gestión</p>
+      </footer>
     </div>
   );
 }
