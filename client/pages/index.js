@@ -57,7 +57,8 @@ export default function Home() {
             <span className="px-3 py-1 bg-orange-500 text-white text-xs rounded-full">
               {user.role === 'admin_aca' ? 'Admin ACA' : 
                user.role === 'operador_aca' ? 'Operador ACA' : 
-               'Admin Cooperativa'}
+               user.role === 'admin_coop' ? 'Admin Cooperativa' :
+               user.role === 'proveedor' ? 'Proveedor' : 'Usuario'}
             </span>
             <button
               onClick={handleLogout}
@@ -72,25 +73,121 @@ export default function Home() {
         <main className="p-6">
           {/* Cards de acciones principales */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Card para ver cooperativas */}
-            <Link href="/cooperativas" className="card-aca group cursor-pointer">
-              <div className="flex items-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                  🏢
+            
+            {/* CARDS PARA PROVEEDORES */}
+            {user.role === 'proveedor' && (
+              <>
+                {/* Card para subir facturas */}
+                <Link href="/proveedor/facturas" className="card-aca group cursor-pointer">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                      📄
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
+                        Mis Facturas
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Subir y gestionar facturas
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">
+                        Enviar a cooperativas
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Card para nueva factura */}
+                <Link href="/proveedor/nueva-factura" className="card-aca group cursor-pointer">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                      ➕
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        Nueva Factura
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Subir nueva factura
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Proceso rápido
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Card para estadísticas */}
+                <div className="card-aca">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                      📊
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Estadísticas
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Resumen de facturas
+                      </p>
+                      <p className="text-xs text-purple-600 mt-1">
+                        Métricas en tiempo real
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    Cooperativas
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Gestionar datos de cooperativas
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    134 cooperativas registradas
-                  </p>
-                </div>
-              </div>
-            </Link>
+              </>
+            )}
+
+            {/* CARDS PARA ADMIN COOPERATIVA */}
+            {user.role === 'admin_coop' && (
+              <>
+                {/* Card para facturas recibidas */}
+                <Link href="/cooperativa/facturas" className="card-aca group cursor-pointer">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                      📨
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+                        Facturas Recibidas
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Revisar y aprobar facturas
+                      </p>
+                      <p className="text-xs text-orange-600 mt-1">
+                        Gestión de proveedores
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </>
+            )}
+
+            {/* CARDS PARA TODOS LOS ROLES (ADMIN ACA, OPERADOR) - NO ADMIN COOP */}
+            {(user.role === 'admin_aca' || user.role === 'operador_aca') && (
+              <>
+                {/* Card para ver cooperativas */}
+                <Link href="/cooperativas" className="card-aca group cursor-pointer">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
+                      🏢
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        Cooperativas
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Gestionar datos de cooperativas
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        134 cooperativas registradas
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </>
+            )}
 
             {/* Card para cambios pendientes (solo admin ACA) */}
             {user.role === 'admin_aca' && (
@@ -136,26 +233,6 @@ export default function Home() {
               </Link>
             )}
 
-            {/* Card para reportes */}
-            <div className="card-aca opacity-75">
-              <div className="flex items-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                  📊
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Reportes
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Estadísticas y análisis
-                  </p>
-                  <p className="text-xs text-purple-600 mt-1">
-                    Próximamente disponible
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Card para configuración (solo admin ACA) */}
             {user.role === 'admin_aca' && (
               <div className="card-aca opacity-75">
@@ -196,14 +273,14 @@ export default function Home() {
                 <div className="text-xs text-green-600">Centros de distribución</div>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <div className="text-3xl font-bold text-orange-600 mb-2">✓</div>
-                <div className="text-sm font-medium text-orange-800">Sistema Activo</div>
-                <div className="text-xs text-orange-600">Funcionando correctamente</div>
+                <div className="text-3xl font-bold text-orange-600 mb-2">📄</div>
+                <div className="text-sm font-medium text-orange-800">Sistema de Facturas</div>
+                <div className="text-xs text-orange-600">Gestión activa y operativa</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <div className="text-3xl font-bold text-purple-600 mb-2">MVP</div>
+                <div className="text-3xl font-bold text-purple-600 mb-2">BETA</div>
                 <div className="text-sm font-medium text-purple-800">Versión Actual</div>
-                <div className="text-xs text-purple-600">Producto mínimo viable</div>
+                <div className="text-xs text-purple-600">En fase de pruebas</div>
               </div>
             </div>
           </div>

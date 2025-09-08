@@ -126,6 +126,7 @@ export default function Login() {
                 <div><strong>Admin ACA:</strong> admin_aca / admin123</div>
                 <div><strong>Operador ACA:</strong> operador_aca / operador123</div>
                 <div><strong>Admin Cooperativa:</strong> admin_coop_1 / coop123</div>
+                <div><strong>🚚 Proveedor:</strong> proveedor_test / proveedor123</div>
               </div>
             </div>
           </div>

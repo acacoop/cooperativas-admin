@@ -48,4 +48,23 @@ export const cooperativesAPI = {
   rejectChange: (id) => api.put(`/api/pending-changes/${id}/reject`)
 };
 
+export const invoicesAPI = {
+  // Proveedor
+  getSupplierInvoices: () => api.get('/api/invoices/supplier'),
+  uploadInvoice: (formData) => api.post('/api/invoices/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  validateInvoice: (id, data) => api.put(`/api/invoices/${id}/validate`, data),
+  
+  // Cooperativa
+  getCooperativeInvoices: () => api.get('/api/invoices/cooperative'),
+  respondInvoice: (id, action, rejection_reason = null) => 
+    api.put(`/api/invoices/${id}/respond`, { action, rejection_reason }),
+  
+  // General
+  getInvoiceItems: (id) => api.get(`/api/invoices/${id}/items`),
+  downloadInvoice: (id) => `${API_BASE_URL}/api/invoices/${id}/download`,
+  exportCSV: () => `${API_BASE_URL}/api/invoices/export/csv`
+};
+
 export default api;
