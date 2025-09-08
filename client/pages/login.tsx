@@ -1,42 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useAuth } from '../utils/AuthContext';
 
+interface Credentials {
+  username: string;
+  password: string;
+}
+
 export default function Login() {
-  const [credentials, setCredentials] = useState({
+  const [credentials, setCredentials] = useState<Credentials>({
     username: '',
     password: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   
   const { login, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
-      router.push('/');
+    if (!loading && user) {
+      // Let AuthContext handle the redirection after login
+      return;
     }
-  }, [user, router]);
+  }, [user, loading]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const result = await login(credentials);
-    
-    if (result.success) {
-      router.push('/');
-    } else {
-      setError(result.error);
+    try {
+      await login(credentials.username, credentials.password);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCredentials({
       ...credentials,
       [e.target.name]: e.target.value

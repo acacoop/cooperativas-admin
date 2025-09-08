@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useAuth } from '../utils/AuthContext';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { User } from '@/types';
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
@@ -31,6 +32,21 @@ export default function Home() {
     return null;
   }
 
+  const getUserRoleDisplay = (role: User['role']): string => {
+    switch (role) {
+      case 'admin_aca':
+        return 'Admin ACA';
+      case 'operador_aca':
+        return 'Operador ACA';
+      case 'admin_coop':
+        return 'Admin Cooperativa';
+      case 'proveedor':
+        return 'Proveedor';
+      default:
+        return 'Usuario';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
@@ -55,10 +71,7 @@ export default function Home() {
               Bienvenido, <strong>{user.username}</strong>
             </span>
             <span className="px-3 py-1 bg-orange-500 text-white text-xs rounded-full">
-              {user.role === 'admin_aca' ? 'Admin ACA' : 
-               user.role === 'operador_aca' ? 'Operador ACA' : 
-               user.role === 'admin_coop' ? 'Admin Cooperativa' :
-               user.role === 'proveedor' ? 'Proveedor' : 'Usuario'}
+              {getUserRoleDisplay(user.role)}
             </span>
             <button
               onClick={handleLogout}
@@ -212,7 +225,7 @@ export default function Home() {
             )}
 
             {/* Card para mi cooperativa (solo admin cooperativa) */}
-            {user.role === 'admin_coop' && (
+            {user.role === 'admin_coop' && user.cooperative_id && (
               <Link href={`/cooperativas/${user.cooperative_id}`} className="card-aca group cursor-pointer">
                 <div className="flex items-center">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">

@@ -3,13 +3,22 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
-import { cooperativesAPI } from '../../utils/api';
+import api from '../../utils/api';
+import { Cooperative } from '@/types';
+
+type Tab = 'general' | 'contact' | 'management' | 'stats';
+
+interface TabDefinition {
+  id: Tab;
+  name: string;
+  icon: string;
+}
 
 export default function CooperativeDetail() {
-  const [cooperative, setCooperative] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('general');
+  const [cooperative, setCooperative] = useState<Cooperative | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<Tab>('general');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -28,8 +37,9 @@ export default function CooperativeDetail() {
 
   const loadCooperative = async () => {
     try {
-      const response = await cooperativesAPI.getById(id);
-      setCooperative(response.data);
+      if (typeof id !== 'string') return;
+      const response = await api.getCooperative(parseInt(id));
+      setCooperative(response);
     } catch (error) {
       setError('Error al cargar la cooperativa');
       console.error('Error:', error);
@@ -86,7 +96,7 @@ export default function CooperativeDetail() {
     );
   }
 
-  const tabs = [
+  const tabs: TabDefinition[] = [
     { id: 'general', name: 'Información General', icon: '📋' },
     { id: 'contact', name: 'Contacto', icon: '📞' },
     { id: 'management', name: 'Dirigentes', icon: '👥' },

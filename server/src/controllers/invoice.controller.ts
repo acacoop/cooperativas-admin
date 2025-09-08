@@ -198,6 +198,55 @@ export class InvoiceController {
     }
   }
 
+  public async getInvoice(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      // Get invoice with supplier and cooperative info
+      const invoice = await db.get<Invoice & { supplier_name: string; cooperative_name: string }>(`
+        SELECT i.*, 
+          u.company_name as supplier_name,
+          c.name as cooperative_name
+        FROM invoices i
+        LEFT JOIN users u ON i.supplier_id = u.id
+        LEFT JOIN cooperatives c ON i.cooperative_id = c.id
+        WHERE i.id = ?
+      `, [id]);
+
+      if (!invoice) {
+        res.status(404).json({ error: 'Factura no encontrada' });
+        return;
+      }
+
+      // Check if user has permission to view this invoice
+      const hasPermission = 
+        (req.user?.role === 'proveedor' && invoice.supplier_id === req.user.id) ||
+        (req.user?.role === 'admin_coop' && invoice.cooperative_id === req.user.cooperative_id) ||
+        req.user?.role === 'admin_aca';
+
+      if (!hasPermission) {
+        res.status(403).json({ error: 'No tiene permisos para ver esta factura' });
+        return;
+      }
+
+      // Get invoice items
+      const items = await db.all<InvoiceItem>(
+        'SELECT * FROM invoice_items WHERE invoice_id = ?',
+        [id]
+      );
+
+      // Return invoice with items
+      res.json({
+        ...invoice,
+        items
+      });
+
+    } catch (error) {
+      console.error('Get invoice error:', error);
+      res.status(500).json({ error: 'Error al obtener factura' });
+    }
+  }
+
   public async getInvoiceItems(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

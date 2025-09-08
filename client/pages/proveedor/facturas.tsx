@@ -3,13 +3,22 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
-import { invoicesAPI } from '../../utils/api';
+import api from '../../utils/api';
+import { Invoice, InvoiceStatus } from '@/types';
+
+type FilterStatus = InvoiceStatus | 'todas';
+
+interface StatusConfig {
+  color: string;
+  text: string;
+  desc: string;
+}
 
 export default function SupplierInvoices() {
-  const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filter, setFilter] = useState('todas'); // todas, pendiente_validacion, enviada, aceptada, rechazada
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [filter, setFilter] = useState<FilterStatus>('todas');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -30,8 +39,8 @@ export default function SupplierInvoices() {
 
   const loadInvoices = async () => {
     try {
-      const response = await invoicesAPI.getSupplierInvoices();
-      setInvoices(response.data);
+      const response = await api.getSupplierInvoices();
+      setInvoices(response);
     } catch (error) {
       setError('Error al cargar facturas');
       console.error('Error:', error);
@@ -40,8 +49,8 @@ export default function SupplierInvoices() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
+  const getStatusBadge = (status: InvoiceStatus) => {
+    const statusConfig: Record<InvoiceStatus, StatusConfig> = {
       'pendiente_validacion': { color: 'yellow', text: '⏳ Pendiente Validación', desc: 'Revisar y enviar' },
       'enviada': { color: 'blue', text: '📤 Enviada', desc: 'Esperando respuesta cooperativa' },
       'aceptada': { color: 'green', text: '✅ Aceptada', desc: 'Aprobada por cooperativa' },
@@ -66,15 +75,16 @@ export default function SupplierInvoices() {
     return invoice.status === filter;
   });
 
-  const getFilterName = (filterValue) => {
-    const filterNames = {
+  const getFilterName = (filterValue: FilterStatus): string => {
+    const filterNames: Record<FilterStatus, string> = {
+      'todas': 'todas',
       'pendiente_validacion': 'pendientes de validación',
       'enviada': 'enviadas',
       'aceptada': 'aceptadas',
       'rechazada': 'rechazadas',
       'corregida': 'corregidas'
     };
-    return filterNames[filterValue] || filterValue;
+    return filterNames[filterValue];
   };
 
   const handleLogout = () => {
@@ -258,7 +268,7 @@ export default function SupplierInvoices() {
                         <div>
                           <label className="text-sm font-medium text-gray-600">Total</label>
                           <p className="font-semibold text-green-600 text-lg">
-                            ${parseFloat(invoice.total_amount).toLocaleString()}
+                            ${invoice.total_amount.toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -273,7 +283,7 @@ export default function SupplierInvoices() {
 
                       {/* Acciones */}
                       <div className="flex items-center space-x-3 mt-4">
-                        {invoice.status === 'pendiente_validacion' && (
+                        {invoice.status === 'pendiente_validacion' && invoice.id && (
                           <Link 
                             href={`/proveedor/facturas/${invoice.id}/validar`}
                             className="btn-aca text-sm"
@@ -282,7 +292,7 @@ export default function SupplierInvoices() {
                           </Link>
                         )}
                         
-                        {invoice.status === 'rechazada' && (
+                        {invoice.status === 'rechazada' && invoice.id && (
                           <Link 
                             href={`/proveedor/facturas/${invoice.id}/corregir`}
                             className="btn-aca text-sm bg-orange-600 hover:bg-orange-700"
@@ -291,14 +301,14 @@ export default function SupplierInvoices() {
                           </Link>
                         )}
 
-                        <a 
-                          href={invoicesAPI.downloadInvoice(invoice.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
-                        >
-                          📥 Descargar PDF
-                        </a>
+                        {invoice.id && (
+                          <button 
+                            onClick={() => window.open(`/api/invoices/${invoice.id}/download`, '_blank')}
+                            className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                          >
+                            📥 Descargar PDF
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

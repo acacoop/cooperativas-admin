@@ -3,15 +3,20 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../../../utils/AuthContext';
-import { invoicesAPI } from '../../../../utils/api';
+import api from '../../../../utils/api';
+import { Invoice, InvoiceItem } from '@/types';
+
+interface InvoiceData extends Invoice {
+  id: number;
+}
 
 export default function ValidateInvoice() {
-  const [invoice, setInvoice] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [invoice, setInvoice] = useState<InvoiceData | null>(null);
+  const [items, setItems] = useState<InvoiceItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -28,7 +33,7 @@ export default function ValidateInvoice() {
       return;
     }
     
-    if (id) {
+    if (id && typeof id === 'string') {
       loadInvoiceData();
     }
   }, [user, router, id]);
@@ -38,7 +43,7 @@ export default function ValidateInvoice() {
       // En un sistema real, necesitaríamos una API para obtener una factura específica
       // Por ahora simulamos los datos
       setInvoice({
-        id: id,
+        id: parseInt(id as string),
         invoice_number: 'FC-0001-00000123',
         issue_date: '2025-09-07',
         issuer_cuit: '20-12345678-9',
@@ -47,11 +52,12 @@ export default function ValidateInvoice() {
         iva_amount: 2100,
         total_amount: 12100,
         status: 'pendiente_validacion'
-      });
+      } as InvoiceData);
       
       setItems([
         {
           id: 1,
+          invoice_id: parseInt(id as string),
           description: 'Producto de ejemplo',
           quantity: 2,
           unit_price: 5000,
@@ -66,25 +72,28 @@ export default function ValidateInvoice() {
   };
 
   const handleValidateAndSend = async () => {
+    if (!invoice) return;
+
     setSubmitting(true);
     setError('');
 
     try {
-      await invoicesAPI.validateInvoice(id, {
+      await api.validateInvoice(invoice.id, {
         invoice_number: invoice.invoice_number,
         issue_date: invoice.issue_date,
         issuer_cuit: invoice.issuer_cuit,
         receiver_cuit: invoice.receiver_cuit,
         subtotal: invoice.subtotal,
         iva_amount: invoice.iva_amount,
-        total_amount: invoice.total_amount
+        total_amount: invoice.total_amount,
+        status: invoice.status
       });
 
       setSuccess('Factura validada y enviada exitosamente a la cooperativa');
       setTimeout(() => {
         router.push('/proveedor/facturas');
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       setError(error.response?.data?.error || 'Error al validar factura');
     } finally {
       setSubmitting(false);
@@ -197,10 +206,10 @@ export default function ValidateInvoice() {
                             <td className="p-3 text-gray-900">{item.description}</td>
                             <td className="p-3 text-right text-gray-900">{item.quantity}</td>
                             <td className="p-3 text-right text-gray-900">
-                              ${parseFloat(item.unit_price).toLocaleString()}
+                              ${item.unit_price.toLocaleString()}
                             </td>
                             <td className="p-3 text-right font-semibold text-gray-900">
-                              ${parseFloat(item.total_price).toLocaleString()}
+                              ${item.total_price.toLocaleString()}
                             </td>
                           </tr>
                         ))}
@@ -216,17 +225,17 @@ export default function ValidateInvoice() {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Subtotal:</span>
-                        <span className="font-semibold">${parseFloat(invoice.subtotal).toLocaleString()}</span>
+                        <span className="font-semibold">${invoice.subtotal.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">IVA:</span>
-                        <span className="font-semibold">${parseFloat(invoice.iva_amount).toLocaleString()}</span>
+                        <span className="font-semibold">${invoice.iva_amount.toLocaleString()}</span>
                       </div>
                       <hr className="border-gray-300" />
                       <div className="flex justify-between text-lg">
                         <span className="font-semibold text-gray-900">Total:</span>
                         <span className="font-bold text-green-600">
-                          ${parseFloat(invoice.total_amount).toLocaleString()}
+                          ${invoice.total_amount.toLocaleString()}
                         </span>
                       </div>
                     </div>

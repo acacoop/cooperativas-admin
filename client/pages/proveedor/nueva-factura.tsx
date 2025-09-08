@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
-import { invoicesAPI } from '../../utils/api';
+import api from '../../utils/api';
+import { InvoiceFormData, InvoiceFormItem } from '@/types/forms';
+
+const initialFormData: InvoiceFormData = {
+  invoice_number: '',
+  issue_date: '',
+  issuer_cuit: '',
+  receiver_cuit: '',
+  subtotal: '',
+  iva_amount: '',
+  total_amount: '',
+  items: [{ description: '', quantity: '', unit_price: '', total_price: '' }]
+};
 
 export default function NewInvoice() {
-  const [formData, setFormData] = useState({
-    invoice_number: '',
-    issue_date: '',
-    issuer_cuit: '',
-    receiver_cuit: '',
-    subtotal: '',
-    iva_amount: '',
-    total_amount: '',
-    items: [{ description: '', quantity: '', unit_price: '', total_price: '' }]
-  });
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -39,12 +42,12 @@ export default function NewInvoice() {
     if (user.cuit) {
       setFormData(prev => ({
         ...prev,
-        issuer_cuit: user.cuit
+        issuer_cuit: user.cuit || ''
       }));
     }
   }, [user, router]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -64,7 +67,7 @@ export default function NewInvoice() {
     }
   };
 
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = (index: number, field: keyof InvoiceFormItem, value: string) => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
 
@@ -98,7 +101,7 @@ export default function NewInvoice() {
     }));
   };
 
-  const removeItem = (index) => {
+  const removeItem = (index: number) => {
     if (formData.items.length > 1) {
       const newItems = formData.items.filter((_, i) => i !== index);
       setFormData(prev => ({
@@ -108,8 +111,8 @@ export default function NewInvoice() {
     }
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
         setError('Solo se permiten archivos PDF');
@@ -124,7 +127,7 @@ export default function NewInvoice() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -140,24 +143,24 @@ export default function NewInvoice() {
       const submitData = new FormData();
       
       // Agregar datos del formulario
-      Object.keys(formData).forEach(key => {
+      Object.entries(formData).forEach(([key, value]) => {
         if (key === 'items') {
-          submitData.append('items', JSON.stringify(formData.items));
+          submitData.append('items', JSON.stringify(value));
         } else {
-          submitData.append(key, formData[key]);
+          submitData.append(key, value);
         }
       });
       
       // Agregar archivo
       submitData.append('invoice', file);
 
-      const response = await invoicesAPI.uploadInvoice(submitData);
+      await api.uploadInvoice(submitData);
       
       setSuccess('Factura subida exitosamente. Ahora debe validarla antes de enviarla.');
       setTimeout(() => {
         router.push('/proveedor/facturas');
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       setError(error.response?.data?.error || 'Error al subir factura');
     } finally {
       setLoading(false);
@@ -357,7 +360,7 @@ export default function NewInvoice() {
                       <div className="mt-3 text-right">
                         <span className="text-sm font-medium text-gray-600">Total: </span>
                         <span className="font-semibold text-green-600">
-                          ${parseFloat(item.total_price || 0).toLocaleString()}
+                          ${parseFloat(item.total_price || '0').toLocaleString()}
                         </span>
                       </div>
                     </div>

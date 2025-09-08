@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
-import { cooperativesAPI } from '../../utils/api';
+import api from '../../utils/api';
+import { Cooperative } from '@/types';
 
 export default function Cooperativas() {
-  const [cooperatives, setCooperatives] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [cooperatives, setCooperatives] = useState<Cooperative[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -25,8 +26,8 @@ export default function Cooperativas() {
 
   const loadCooperatives = async () => {
     try {
-      const response = await cooperativesAPI.getAll();
-      setCooperatives(response.data);
+      const response = await api.getCooperatives();
+      setCooperatives(response);
     } catch (error) {
       setError('Error al cargar cooperativas');
       console.error('Error:', error);
@@ -90,7 +91,7 @@ export default function Cooperativas() {
                 type="text"
                 placeholder="Buscar por nombre, código o CUIT..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 className="w-full"
               />
             </div>

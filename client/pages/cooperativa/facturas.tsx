@@ -2,14 +2,24 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useAuth } from '../../utils/AuthContext';
-import { invoicesAPI } from '../../utils/api';
+import { useAuth } from '@/utils/AuthContext';
+import api from '@/utils/api';
+import { Invoice, InvoiceStatus } from '@/types';
+import { InvoiceCard } from '@/components/InvoiceCard';
+
+type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
+
+interface StatusConfig {
+  color: string;
+  text: string;
+  desc: string;
+}
 
 export default function CooperativeInvoices() {
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('todas'); // todas, enviada, aceptada, rechazada
+  const [filter, setFilter] = useState<FilterStatus>('todas');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -30,8 +40,8 @@ export default function CooperativeInvoices() {
 
   const loadInvoices = async () => {
     try {
-      const response = await invoicesAPI.getCooperativeInvoices();
-      setInvoices(response.data);
+      const data = await api.getCooperativeInvoices();
+      setInvoices(data);
     } catch (error) {
       setError('Error al cargar facturas');
       console.error('Error:', error);
@@ -40,17 +50,21 @@ export default function CooperativeInvoices() {
     }
   };
 
-  const handleInvoiceResponse = async (invoiceId, action, rejectionReason = '') => {
+  const handleInvoiceResponse = async (
+    invoiceId: number,
+    action: 'aceptar' | 'rechazar',
+    rejectionReason?: string
+  ) => {
     try {
-      await invoicesAPI.respondInvoice(invoiceId, action, rejectionReason);
-      loadInvoices(); // Recargar lista
-    } catch (error) {
+      await api.respondToInvoice(invoiceId, action, rejectionReason);
+      loadInvoices();
+    } catch (error: any) {
       setError(error.response?.data?.error || 'Error al responder factura');
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, StatusConfig> = {
       'enviada': { color: 'blue', text: '📤 Enviada', desc: 'Esperando su respuesta' },
       'aceptada': { color: 'green', text: '✅ Aceptada', desc: 'Aprobada por usted' },
       'rechazada': { color: 'red', text: '❌ Rechazada', desc: 'Rechazada por usted' },
@@ -75,14 +89,16 @@ export default function CooperativeInvoices() {
     return invoice.status === filter;
   });
 
-  const getFilterName = (filterValue) => {
-    const filterNames = {
+  const getFilterName = (filterValue: FilterStatus): string => {
+    const filterNames: Record<FilterStatus, string> = {
+      'todas': 'todas',
       'enviada': 'pendientes de respuesta',
       'aceptada': 'aceptadas',
       'rechazada': 'rechazadas',
-      'corregida': 'corregidas'
+      'corregida': 'corregidas',
+      'pendiente_validacion': 'pendientes de validación'
     };
-    return filterNames[filterValue] || filterValue;
+    return filterNames[filterValue];
   };
 
   const handleLogout = () => {
@@ -112,7 +128,7 @@ export default function CooperativeInvoices() {
           <h1>Facturas Recibidas</h1>
           <h2>Cooperativa: {user.username}</h2>
           
-          {/* Información del usuario */}
+          {/* User info */}
           <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
             <span className="text-sm">{user.username}</span>
             <button
@@ -124,15 +140,15 @@ export default function CooperativeInvoices() {
           </div>
         </div>
 
-        {/* Contenido principal */}
+        {/* Main content */}
         <main className="p-6">
-          {/* Filtros y acciones */}
+          {/* Filters and actions */}
           <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <label className="text-sm font-medium text-gray-700">Filtrar por estado:</label>
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={(e) => setFilter(e.target.value as FilterStatus)}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
               >
                 <option value="todas">Todas las facturas</option>
@@ -145,7 +161,7 @@ export default function CooperativeInvoices() {
             
             <div className="flex space-x-3">
               <a
-                href={invoicesAPI.exportCSV()}
+                href="/api/invoices/export/csv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-aca text-sm bg-green-600 hover:bg-green-700"
@@ -155,7 +171,7 @@ export default function CooperativeInvoices() {
             </div>
           </div>
 
-          {/* Estadísticas rápidas - Ahora son botones de filtro */}
+          {/* Quick stats - Now filter buttons */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => setFilter('todas')}
@@ -218,14 +234,14 @@ export default function CooperativeInvoices() {
             </button>
           </div>
 
-          {/* Alertas */}
+          {/* Alerts */}
           {error && (
             <div className="alert-aca alert-error mb-6">
               {error}
             </div>
           )}
 
-          {/* Lista de facturas */}
+          {/* Invoice list */}
           {loading ? (
             <div className="card-aca text-center py-12">
               <div className="spinner-aca mb-4"></div>
@@ -233,7 +249,7 @@ export default function CooperativeInvoices() {
             </div>
           ) : filteredInvoices.length === 0 ? (
             <div className="card-aca text-center py-12">
-              <div className="text-6xl mb-4">�</div>
+              <div className="text-6xl mb-4">📭</div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 {filter === 'todas' ? 'No hay facturas recibidas' : `No hay facturas ${getFilterName(filter)}`}
               </h3>
@@ -265,153 +281,6 @@ export default function CooperativeInvoices() {
             </div>
           )}
         </main>
-      </div>
-    </div>
-  );
-}
-
-// Componente para cada factura
-function InvoiceCard({ invoice, onResponse, getStatusBadge }) {
-  const [showRejectForm, setShowRejectForm] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [responding, setResponding] = useState(false);
-
-  const handleAccept = async () => {
-    setResponding(true);
-    await onResponse(invoice.id, 'aceptar');
-    setResponding(false);
-  };
-
-  const handleReject = async () => {
-    if (!rejectionReason.trim()) {
-      alert('Debe especificar un motivo para el rechazo');
-      return;
-    }
-    
-    setResponding(true);
-    await onResponse(invoice.id, 'rechazar', rejectionReason);
-    setResponding(false);
-    setShowRejectForm(false);
-    setRejectionReason('');
-  };
-
-  const canRespond = invoice.status === 'enviada' || invoice.status === 'corregida';
-
-  return (
-    <div className="card-aca">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {/* Encabezado de factura */}
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Factura #{invoice.invoice_number}
-            </h3>
-            {getStatusBadge(invoice.status)}
-          </div>
-
-          {/* Información principal */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <label className="text-sm font-medium text-gray-600">Fecha</label>
-              <p className="font-semibold text-gray-900">
-                {new Date(invoice.issue_date).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">Proveedor</label>
-              <p className="font-semibold text-gray-900">
-                {invoice.supplier_name || 'No especificado'}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">CUIT Emisor</label>
-              <p className="font-semibold text-gray-900">{invoice.issuer_cuit}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600">Total</label>
-              <p className="font-semibold text-green-600 text-lg">
-                ${parseFloat(invoice.total_amount).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          {/* Motivo de rechazo previo si aplica */}
-          {invoice.status === 'corregida' && (
-            <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-              <h4 className="font-semibold text-purple-800 mb-1">📝 Factura corregida:</h4>
-              <p className="text-sm text-purple-700">
-                El proveedor ha corregido y reenviado esta factura tras su rechazo anterior.
-              </p>
-            </div>
-          )}
-
-          {/* Formulario de rechazo */}
-          {showRejectForm && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <h4 className="font-semibold text-red-800 mb-2">Motivo del rechazo:</h4>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Describa el motivo del rechazo..."
-                className="w-full p-2 border border-red-300 rounded-md text-sm"
-                rows="3"
-              />
-              <div className="flex space-x-2 mt-3">
-                <button
-                  onClick={handleReject}
-                  disabled={responding}
-                  className="btn-aca text-sm bg-red-600 hover:bg-red-700"
-                >
-                  {responding ? 'Rechazando...' : 'Confirmar Rechazo'}
-                </button>
-                <button
-                  onClick={() => setShowRejectForm(false)}
-                  className="btn-aca text-sm bg-gray-600 hover:bg-gray-700"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Acciones */}
-          <div className="flex items-center space-x-3">
-            {canRespond && (
-              <>
-                <button
-                  onClick={handleAccept}
-                  disabled={responding}
-                  className="btn-aca text-sm bg-green-600 hover:bg-green-700"
-                >
-                  {responding ? 'Procesando...' : '✅ Aceptar'}
-                </button>
-                
-                <button
-                  onClick={() => setShowRejectForm(!showRejectForm)}
-                  className="btn-aca text-sm bg-red-600 hover:bg-red-700"
-                >
-                  ❌ Rechazar
-                </button>
-              </>
-            )}
-
-            <a
-              href={invoicesAPI.downloadInvoice(invoice.id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              📥 Descargar PDF
-            </a>
-
-            <Link
-              href={`/cooperativa/facturas/${invoice.id}`}
-              className="text-sm text-purple-600 hover:text-purple-800 transition-colors"
-            >
-              👁️ Ver Detalle
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );
