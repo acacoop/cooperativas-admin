@@ -4,8 +4,13 @@
   "description": "Backend para el sistema de gestión de cooperativas",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "typecheck": "tsc --noEmit",
+    "script:assign-invoices": "ts-node src/scripts/assign-invoices-to-coop.ts",
+    "script:create-supplier": "ts-node src/scripts/create-supplier.ts",
+    "script:init-invoices": "ts-node src/scripts/init-invoices.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,6 +22,15 @@
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.3.1",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
   }
 }
