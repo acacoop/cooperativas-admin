@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { User } from '@/types';
 import { Header } from '@/components/layout/Header';
+import MenuCard from '@/components/ui/MenuCard';
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
@@ -51,8 +52,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>Sistema de Gestión de Cooperativas - ACA</title>
-        <meta name="description" content="Sistema para gestionar las 134 cooperativas de ACA" />
+        <title>Portal de Cooperativas - ACA</title>
+        <meta name="description" content="Portal de gestion para las 134 cooperativas de ACA" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -71,64 +72,39 @@ export default function Home() {
             {user.role === 'proveedor' && (
               <>
                 {/* Card para subir facturas */}
-                <Link href="/proveedor/facturas" className="card-aca group cursor-pointer">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                      📄
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
-                        Mis Facturas
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Subir y gestionar facturas
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Enviar a cooperativas
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <MenuCard
+                  href="/proveedor/facturas"
+                  icon="📄"
+                  title="Mis Facturas"
+                  subtitle="Subir y gestionar facturas"
+                  footerText="Enviar a cooperativas"
+                  gradientFrom="rgb(34, 197, 94)"
+                  gradientTo="rgb(22, 163, 74)"
+                  hoverColor="rgb(22, 163, 74)"
+                />
 
                 {/* Card para nueva factura */}
-                <Link href="/proveedor/nueva-factura" className="card-aca group cursor-pointer">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                      ➕
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        Nueva Factura
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Subir nueva factura
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        Proceso rápido
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <MenuCard
+                  href="/proveedor/nueva-factura"
+                  icon="➕"
+                  title="Nueva Factura"
+                  subtitle="Subir nueva factura"
+                  footerText="Proceso rápido"
+                  gradientFrom="rgb(59, 130, 246)"
+                  gradientTo="rgb(37, 99, 235)"
+                  hoverColor="rgb(37, 99, 235)"
+                />
 
                 {/* Card para estadísticas */}
-                <div className="card-aca">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                      📊
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Estadísticas
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Resumen de facturas
-                      </p>
-                      <p className="text-xs text-purple-600 mt-1">
-                        Métricas en tiempo real
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <MenuCard
+                  icon="📊"
+                  title="Estadísticas"
+                  subtitle="Resumen de facturas"
+                  footerText="Métricas en tiempo real"
+                  gradientFrom="rgb(168, 85, 247)"
+                  gradientTo="rgb(147, 51, 234)"
+                  hoverColor="rgb(147, 51, 234)"
+                />
               </>
             )}
 
@@ -136,24 +112,16 @@ export default function Home() {
             {user.role === 'admin_coop' && (
               <>
                 {/* Card para facturas recibidas */}
-                <Link href="/cooperativa/facturas" className="card-aca group cursor-pointer">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                      📨
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
-                        Facturas Recibidas
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Revisar y aprobar facturas
-                      </p>
-                      <p className="text-xs text-orange-600 mt-1">
-                        Gestión de proveedores
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <MenuCard
+                  href="/cooperativa/facturas"
+                  icon="📨"
+                  title="Facturas Recibidas"
+                  subtitle="Revisar y aprobar facturas"
+                  footerText="Gestión de proveedores"
+                  gradientFrom="rgb(249, 115, 22)"
+                  gradientTo="rgb(234, 88, 12)"
+                  hoverColor="rgb(234, 88, 12)"
+                />
               </>
             )}
 
@@ -161,91 +129,57 @@ export default function Home() {
             {(user.role === 'admin_aca' || user.role === 'operador_aca') && (
               <>
                 {/* Card para ver cooperativas */}
-                <Link href="/cooperativas" className="card-aca group cursor-pointer">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                      🏢
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        Cooperativas
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Gestionar datos de cooperativas
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        134 cooperativas registradas
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                <MenuCard
+                  href="/cooperativas"
+                  icon="🏢"
+                  title="Cooperativas"
+                  subtitle="Gestionar datos de cooperativas"
+                  footerText="134 cooperativas registradas"
+                  gradientFrom="rgb(59, 130, 246)"
+                  gradientTo="rgb(37, 99, 235)"
+                  hoverColor="rgb(37, 99, 235)"
+                />
               </>
             )}
 
             {/* Card para cambios pendientes (solo admin ACA) */}
             {user.role === 'admin_aca' && (
-              <Link href="/cambios-pendientes" className="card-aca group cursor-pointer">
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl">
-                    ⏰
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
-                      Cambios Pendientes
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Aprobar modificaciones
-                    </p>
-                    <p className="text-xs text-orange-600 mt-1">
-                      Revisión requerida
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <MenuCard
+                href="/cambios-pendientes"
+                icon="⏰"
+                title="Cambios Pendientes"
+                subtitle="Aprobar modificaciones"
+                footerText="Revisión requerida"
+                gradientFrom="rgb(234, 179, 8)"
+                gradientTo="rgb(249, 115, 22)"
+                hoverColor="rgb(249, 115, 22)"
+              />
             )}
-
             {/* Card para mi cooperativa (solo admin cooperativa) */}
             {user.role === 'admin_coop' && user.cooperative_id && (
-              <Link href={`/cooperativas/${user.cooperative_id}`} className="card-aca group cursor-pointer">
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                    👤
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
-                      Mi Cooperativa
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Actualizar información
-                    </p>
-                    <p className="text-xs text-green-600 mt-1">
-                      Acceso directo
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <MenuCard
+                href={`/cooperativas/${user.cooperative_id}`}
+                icon="👤"
+                title="Mi Cooperativa"
+                subtitle="Actualizar información"
+                footerText="Acceso directo"
+                gradientFrom="rgb(34, 197, 94)"
+                gradientTo="rgb(22, 163, 74)"
+                hoverColor="rgb(22, 163, 74)"
+              />
             )}
 
             {/* Card para configuración (solo admin ACA) */}
             {user.role === 'admin_aca' && (
-              <div className="card-aca opacity-75">
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center text-white text-2xl">
-                    ⚙️
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Configuración
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Gestión del sistema
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Próximamente disponible
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <MenuCard
+                icon="⚙️"
+                title="Configuración"
+                subtitle="Gestión del sistema"
+                footerText="Próximamente disponible"
+                gradientFrom="rgb(156, 163, 175)"
+                gradientTo="rgb(107, 114, 128)"
+                hoverColor="rgb(107, 114, 128)"
+              />
             )}
           </div>
 
