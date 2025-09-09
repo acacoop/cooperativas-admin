@@ -1,40 +1,42 @@
 # Design Document: Portal Coop (Cooperativas Admin)
 
 ## Project Overview
+
 A management system for Argentinian Cooperatives (Asociación de Cooperativas Argentinas - ACA) that handles cooperative administration, invoice management, and user roles.
 
 ## Technical Stack
 
 Frontend (Client)
+
 - Framework: Next.js v14.0.0
 - Core Libraries:
-    - React v18.2.0
-    - React DOM v18.2.0
+  - React v18.2.0
+  - React DOM v18.2.0
 - Styling:
-    - TailwindCSS v3.3.0
-    - PostCSS v8.4.31
-    - Autoprefixer v10.4.16
+  - TailwindCSS v3.3.0
+  - PostCSS v8.4.31
+  - Autoprefixer v10.4.16
 - HTTP Client:
-    - Axios v1.5.0
+  - Axios v1.5.0
 - Development Tools:
-    - ESLint v8.52.0
-    - ESLint Config Next v14.0.0
+  - ESLint v8.52.0
+  - ESLint Config Next v14.0.0
 
 Backend (Server)
+
 - Runtime: Node.js
 - Framework: Express.js v4.18.2
 - Database: SQLite3 v5.1.6
 - Authentication & Security:
-    - bcryptjs v2.4.3
-    - jsonwebtoken v9.0.2
+  - bcryptjs v2.4.3
+  - jsonwebtoken v9.0.2
 - Middleware:
-    - CORS v2.8.5
-    - Multer v2.0.2 (File uploads)
+  - CORS v2.8.5
+  - Multer v2.0.2 (File uploads)
 - Configuration:
-    - dotenv v16.3.1
+  - dotenv v16.3.1
 - Development Tools:
-    - nodemon v3.0.1
-
+  - nodemon v3.0.1
 
 ## Project Structure
 
@@ -53,6 +55,7 @@ cooperativas-admin/
 └── Data/                    # Data files and spreadsheets
 
 Key Features
+
 1. Authentication System
     - User role-based access control
     - JWT-based authentication
@@ -76,11 +79,13 @@ Key Features
     - Administrative staff
 
 ## Data Management
+
 - SQLite database for data persistence
 - File storage system for invoices and documents
 - Data import capabilities from Excel/CSV files
 
 ## Development Environment
+
 - Concurrent development server support
 - Hot-reloading for both frontend and backend
 - Environment variable management
@@ -88,15 +93,16 @@ Key Features
 - Custom port configuration (Frontend: 3000)
 
 ## Security Features
+
 - CORS protection
 - JWT authentication
 - Secure file upload handling
 - Password hashing
 - Environment variable protection
 
-# Application Flow Documentation
+## Application Flow Documentation
 
-## User Authentication Flow
+### User Authentication Flow
 
 ```mermaid
 graph TD
@@ -125,7 +131,7 @@ graph TD
     end
 ```
 
-## Invoice Upload Flow
+### Invoice Upload Flow
 
 ```mermaid
 graph TD
@@ -161,7 +167,7 @@ graph TD
     end
 ```
 
-## Invoice Processing Flow
+### Invoice Processing Flow
 
 ```mermaid
 graph TD
@@ -188,7 +194,7 @@ graph TD
     end
 ```
 
-## Data Flow
+### Data Flow
 
 ```mermaid
 graph LR
@@ -215,7 +221,7 @@ graph LR
     end
 ```
 
-## User Role Permissions
+### User Role Permissions
 
 ```mermaid
 graph TD
@@ -242,5 +248,3 @@ graph TD
     P3[Self Access]
     end
 ```
-
-

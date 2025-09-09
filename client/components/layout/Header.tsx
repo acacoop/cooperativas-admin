@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { useAuth } from '@/utils/AuthContext';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
+import styles from './Header.module.css';
 
 interface HeaderProps {
   title: string;
@@ -27,11 +29,16 @@ export function Header({ title, subtitle, backUrl, backLabel }: HeaderProps) {
       )}
       
       <div className="aca-brand">
-        <div className="aca-logo">ACA</div>
+        <div className={styles['aca-logo']}>
+          <Image src="/logos/aca-logo.png" alt="ACA Logo" width={120} height={60} className="h-auto" priority />
+        </div>
         <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
       </div>
       
       <h1>{title}</h1>
+      {user && (
+        <h2>Cooperativa: {user.company_name || user.username}</h2>
+      )}
       {subtitle && <h2>{subtitle}</h2>}
       
       {/* User info */}

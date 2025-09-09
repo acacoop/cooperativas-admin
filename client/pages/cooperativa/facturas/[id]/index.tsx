@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { useAuth } from '../../../../utils/AuthContext';
 import api from '../../../../utils/api';
 import { Invoice, InvoiceItem } from '@/types';
+import { Header } from '@/components/layout/Header';
+import { InvoiceDetails } from '@/components/invoices/InvoiceDetails';
+import { InvoiceItemDetails } from '@/components/invoices/InvoiceItemDetails';
+import { InvoiceTotals } from '@/components/invoices/InvoiceTotals';
+import { InvoiceStatusBadge } from '@/components/invoices/InvoiceStatusBadge';
 
 interface InvoiceDetailProps {
   invoice: Invoice & { id: number };
@@ -115,18 +120,11 @@ export default function InvoiceDetail() {
 
       <div className="container-aca">
         {/* Header */}
-        <div className="header-aca">
-          <Link href="/cooperativa/facturas" className="btn-back">
-            ← Volver a Facturas
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Detalle de Factura</h1>
-          <h2>Cooperativa: {user.company_name || user.username}</h2>
-        </div>
+        <Header 
+          title="Detalle de Factura"
+          backUrl="/cooperativa/facturas"
+          backLabel="Volver a Facturas"
+        />
 
         {/* Main Content */}
         <main className="p-6">
@@ -152,108 +150,19 @@ export default function InvoiceDetail() {
             ) : invoice ? (
               <div className="space-y-6">
                 {/* Status Banner */}
-                <div className={`alert-aca ${
-                  invoice.status === 'aceptada' ? 'alert-success' :
-                  invoice.status === 'rechazada' ? 'alert-error' :
-                  'alert-warning'
-                } mb-6`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">
-                        Estado: {
-                          invoice.status === 'aceptada' ? '✅ Aceptada' :
-                          invoice.status === 'rechazada' ? '❌ Rechazada' :
-                          '⏳ Pendiente de Revisión'
-                        }
-                      </p>
-                      {invoice.status === 'rechazada' && invoice.rejection_reason && (
-                        <p className="text-sm mt-1">
-                          Motivo: {invoice.rejection_reason}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <InvoiceStatusBadge 
+                  status={invoice.status} 
+                  rejectionReason={invoice.rejection_reason} 
+                />
 
                 {/* Invoice Details */}
-                <div className="card-aca">
-                  <h3 className="mb-4">📄 Datos de la Factura</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Número de Factura</label>
-                      <p className="font-semibold text-gray-900">{invoice.invoice_number}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Fecha de Emisión</label>
-                      <p className="font-semibold text-gray-900">
-                        {new Date(invoice.issue_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">CUIT Emisor</label>
-                      <p className="font-semibold text-gray-900">{invoice.issuer_cuit}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">CUIT Receptor</label>
-                      <p className="font-semibold text-gray-900">{invoice.receiver_cuit}</p>
-                    </div>
-                  </div>
-                </div>
+                <InvoiceDetails invoice={invoice} />
 
                 {/* Items */}
-                <div className="card-aca">
-                  <h3 className="mb-4">🛒 Items de la Factura</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left p-3 text-sm font-medium text-gray-600">Descripción</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Cantidad</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Precio Unit.</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items.map((item, index) => (
-                          <tr key={index} className="border-b border-gray-100">
-                            <td className="p-3 text-gray-900">{item.description}</td>
-                            <td className="p-3 text-right text-gray-900">{item.quantity}</td>
-                            <td className="p-3 text-right text-gray-900">
-                              ${item.unit_price.toLocaleString()}
-                            </td>
-                            <td className="p-3 text-right font-semibold text-gray-900">
-                              ${item.total_price.toLocaleString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                <InvoiceItemDetails items={items} />
 
                 {/* Totals */}
-                <div className="card-aca">
-                  <h3 className="mb-4">💰 Resumen de Totales</h3>
-                  <div className="bg-gray-50 p-6 rounded-lg">
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Subtotal:</span>
-                        <span className="font-semibold">${invoice.subtotal.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">IVA:</span>
-                        <span className="font-semibold">${invoice.iva_amount.toLocaleString()}</span>
-                      </div>
-                      <hr className="border-gray-300" />
-                      <div className="flex justify-between text-lg">
-                        <span className="font-semibold text-gray-900">Total:</span>
-                        <span className="font-bold text-green-600">
-                          ${invoice.total_amount.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <InvoiceTotals invoice={invoice} />
 
                 {/* Actions */}
                 {invoice.status === 'pendiente_validacion' && (

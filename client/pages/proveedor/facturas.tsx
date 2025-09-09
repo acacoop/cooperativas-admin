@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
 import api from '../../utils/api';
 import { Invoice, InvoiceStatus } from '@/types';
+import { Header } from '@/components/layout/Header';
 
 type FilterStatus = InvoiceStatus | 'todas';
 
@@ -101,30 +102,12 @@ export default function SupplierInvoices() {
       </Head>
 
       <div className="container-aca">
-        {/* Header ACA */}
-        <div className="header-aca">
-          <Link href="/" className="btn-back">
-            ← Volver al Dashboard
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Gestión de Facturas</h1>
-          <h2>Proveedor: {user.company_name || user.username}</h2>
-          
-          {/* Información del usuario */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+        <Header 
+          title="Gestión de Facturas"
+          subtitle={`Proveedor: ${user.company_name || user.username}`}
+          backUrl="/"
+          backLabel="Volver al Dashboard"
+        />
 
         {/* Contenido principal */}
         <main className="p-6">

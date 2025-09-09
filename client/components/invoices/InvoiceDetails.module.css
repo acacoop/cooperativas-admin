@@ -1,0 +1,29 @@
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-gray);
+}
+
+.value {
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-top: 0.25rem;
+}
+
+/* Media query for responsive design */
+@media (min-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

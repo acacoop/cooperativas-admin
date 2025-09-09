@@ -4,6 +4,7 @@ import { useAuth } from '../utils/AuthContext';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { User } from '@/types';
+import { Header } from '@/components/layout/Header';
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
@@ -56,31 +57,10 @@ export default function Home() {
       </Head>
 
       <div className="container-aca">
-        {/* Header ACA */}
-        <div className="header-aca">
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Sistema de Gestión de Cooperativas</h1>
-          <h2>Dashboard Principal</h2>
-          
-          {/* Información del usuario */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">
-              Bienvenido, <strong>{user.username}</strong>
-            </span>
-            <span className="px-3 py-1 bg-orange-500 text-white text-xs rounded-full">
-              {getUserRoleDisplay(user.role)}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+        <Header 
+          title="Sistema de Gestión de Cooperativas"
+          subtitle="Dashboard Principal"
+        />
 
         {/* Contenido principal */}
         <main className="p-6">

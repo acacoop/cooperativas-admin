@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useAuth } from '../utils/AuthContext';
+import LoginHeader from '../components/login/LoginHeader';
 
 interface Credentials {
   username: string;
@@ -54,14 +55,7 @@ export default function Login() {
       </Head>
       
       {/* Header ACA */}
-      <div className="header-aca">
-        <div className="aca-brand">
-          <div className="aca-logo">ACA</div>
-          <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-        </div>
-        <h1>Sistema de Gestión de Cooperativas</h1>
-        <h2>Acceso Administradores</h2>
-      </div>
+      <LoginHeader />
 
       {/* Contenido principal */}
       <div className="flex-1 flex items-center justify-center p-6">

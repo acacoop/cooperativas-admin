@@ -6,6 +6,7 @@ import { useAuth } from '@/utils/AuthContext';
 import api from '@/utils/api';
 import { Invoice, InvoiceStatus } from '@/types';
 import { InvoiceCard } from '@/components/InvoiceCard';
+import { Header } from '@/components/layout/Header';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
 
@@ -115,30 +116,11 @@ export default function CooperativeInvoices() {
       </Head>
 
       <div className="container-aca">
-        {/* Header ACA */}
-        <div className="header-aca">
-          <Link href="/" className="btn-back">
-            ← Volver al Dashboard
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Facturas Recibidas</h1>
-          <h2>Cooperativa: {user.username}</h2>
-          
-          {/* User info */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+        <Header 
+          title="Facturas Recibidas"
+          backUrl="/"
+          backLabel="Volver al Dashboard"
+        />
 
         {/* Main content */}
         <main className="p-6">

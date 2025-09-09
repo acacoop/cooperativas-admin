@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .invoice-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .invoice-label {
+    @apply text-sm font-medium text-gray-600;
+  }
+
+  .invoice-value {
+    @apply font-semibold text-gray-900;
+  }
+
+  .status-badge-wrapper {
+    @apply flex flex-col;
+  }
+
+  .status-badge {
+    @apply px-3 py-1 text-xs font-semibold rounded-full;
+  }
+
+  .status-description {
+    @apply text-xs text-gray-500 mt-1;
+  }
+
+  .status-enviada {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  .status-aceptada {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .status-rechazada {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .status-corregida {
+    @apply bg-purple-100 text-purple-800;
+  }
+
+  .status-pendiente {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .status-default {
+    @apply bg-gray-100 text-gray-800;
+  }
+}
