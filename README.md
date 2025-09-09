@@ -6,8 +6,8 @@
 Este es un sistema de gestión para las 134 cooperativas de la **Asociación de Cooperativas Argentinas (ACA)**.
 
 ### Características del MVP:
-- Frontend: React con NextJS (mobile-first)
-- Backend: Node.js con Express
+- Frontend: React con NextJS en TypeScript (mobile-first)
+- Backend: Node.js con Express en TypeScript
 - Base de datos: SQLite (para el MVP, luego PostgreSQL)
 - Autenticación básica
 
@@ -15,6 +15,7 @@ Este es un sistema de gestión para las 134 cooperativas de la **Asociación de 
 1. **Admin ACA**: Acceso total
 2. **Operador ACA**: Solo lectura
 3. **Admin Cooperativa**: Solo sus datos
+4. **Proveedor**: Solo sus datos
 
 ### Funcionalidades MVP:
 - Login por roles
