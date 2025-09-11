@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useAuth } from '../utils/AuthContext';
 import LoginHeader from '../components/login/LoginHeader';
+import LogoCarousel from '../components/login/LogoCarousel';
 
 interface Credentials {
   username: string;
@@ -49,7 +50,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen w-full flex flex-col relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[2px]"
+        style={{ backgroundImage: 'url("/background/trigo.jpg")' }}
+      />
+      <div className="absolute inset-0 bg-black/30" />
+      <div className="relative flex flex-col flex-1 z-10">
       <Head>
         <title>Login - Sistema ACA Cooperativas</title>
       </Head>
@@ -58,11 +65,19 @@ export default function Login() {
       <LoginHeader />
 
       {/* Contenido principal */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
+      <main className="flex-1 flex items-center justify-between w-full p-4 sm:p-6">
+        {/* Logo Carousel */}
+        <div className="hidden lg:flex flex-1 items-center justify-center">
+          <div className="backdrop-blur-md bg-white/30 p-8 rounded-full">
+            <LogoCarousel />
+          </div>
+        </div>
+        
+        {/* Form Container */}
+        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
           {/* Formulario de login */}
-          <div className="card-aca">
-            <h3 className="text-center mb-6">Iniciar Sesión</h3>
+          <div className="card-aca backdrop-blur-md bg-white/90">
+            <h3 className="text-center mb-6 text-gray-800">Iniciar Sesión</h3>
             
             {error && (
               <div className="alert-aca alert-error mb-4">
@@ -129,12 +144,13 @@ export default function Login() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white text-center py-4">
-        <p>&copy; 2025 Asociación de Cooperativas Argentinas - Sistema de Gestión</p>
+      <footer className="w-full bg-gray-800 text-white text-center p-4 mt-auto">
+        <p className="text-sm sm:text-base">&copy; 2025 Asociación de Cooperativas Argentinas - Sistema de Gestión</p>
       </footer>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,130 @@
+.container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.content {
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17, 24, 39);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(75, 85, 99);
+}
+
+.value {
+  font-weight: 600;
+  color: rgb(17, 24, 39);
+}
+
+.totalValue {
+  font-weight: 600;
+  color: rgb(22, 163, 74);
+  font-size: 1.125rem;
+}
+
+.correctedAlert {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: rgb(243, 232, 255);
+  border: 1px solid rgb(233, 213, 255);
+  border-radius: 0.5rem;
+}
+
+.correctedTitle {
+  font-weight: 600;
+  color: rgb(107, 33, 168);
+  margin-bottom: 0.25rem;
+}
+
+.correctedText {
+  font-size: 0.875rem;
+  color: rgb(126, 34, 206);
+}
+
+.rejectForm {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: rgb(254, 242, 242);
+  border: 1px solid rgb(254, 226, 226);
+  border-radius: 0.5rem;
+}
+
+.rejectTitle {
+  font-weight: 600;
+  color: rgb(153, 27, 27);
+  margin-bottom: 0.5rem;
+}
+
+.rejectInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgb(252, 165, 165);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.rejectActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.downloadButton {
+  font-size: 0.875rem;
+  color: rgb(37, 99, 235);
+  transition: color 150ms;
+}
+
+.downloadButton:hover {
+  color: rgb(29, 78, 216);
+}
+
+.detailsButton {
+  font-size: 0.875rem;
+  color: rgb(126, 34, 206);
+  transition: color 150ms;
+}
+
+.detailsButton:hover {
+  color: rgb(107, 33, 168);
+}
+
+@media (min-width: 768px) {
+  .infoGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

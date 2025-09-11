@@ -1,5 +1,6 @@
 import { InvoiceItem } from '@/types';
 import { Card } from '../ui';
+import styles from './InvoiceItemDetails.module.css';
 
 interface InvoiceItemDetailsProps {
   items: InvoiceItem[];
@@ -8,25 +9,25 @@ interface InvoiceItemDetailsProps {
 export function InvoiceItemDetails({ items }: InvoiceItemDetailsProps) {
   return (
     <Card title="🛒 Items de la Factura">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left p-3 text-sm font-medium text-gray-600">Descripción</th>
-              <th className="text-right p-3 text-sm font-medium text-gray-600">Cantidad</th>
-              <th className="text-right p-3 text-sm font-medium text-gray-600">Precio Unit.</th>
-              <th className="text-right p-3 text-sm font-medium text-gray-600">Total</th>
+            <tr className={styles.headerRow}>
+              <th className={styles.headerCell}>Descripción</th>
+              <th className={styles.headerCell} align="right">Cantidad</th>
+              <th className={styles.headerCell} align="right">Precio Unit.</th>
+              <th className={styles.headerCell} align="right">Total</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item, index) => (
-              <tr key={index} className="border-b border-gray-100">
-                <td className="p-3 text-gray-900">{item.description}</td>
-                <td className="p-3 text-right text-gray-900">{item.quantity}</td>
-                <td className="p-3 text-right text-gray-900">
+              <tr key={index} className={styles.tableRow}>
+                <td className={styles.tableCell}>{item.description}</td>
+                <td className={styles.tableCell} align="right">{item.quantity}</td>
+                <td className={styles.tableCell} align="right">
                   ${item.unit_price.toLocaleString()}
                 </td>
-                <td className="p-3 text-right font-semibold text-gray-900">
+                <td className={styles.totalCell} align="right">
                   ${item.total_price.toLocaleString()}
                 </td>
               </tr>

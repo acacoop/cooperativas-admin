@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/utils/AuthContext';
 import api from '@/utils/api';
 import { Invoice, InvoiceStatus } from '@/types';
-import { InvoiceCard } from '@/components/InvoiceCard';
+import { InvoiceCard } from '@/components/invoices/InvoiceCard';
 import { Header } from '@/components/layout/Header';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';

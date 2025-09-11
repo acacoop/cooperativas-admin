@@ -50,16 +50,22 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[2px]"
+        style={{ backgroundImage: 'url("/background/soja.jpg")' }}
+      />
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="relative z-10 min-h-screen">
       <Head>
         <title>Portal de Cooperativas - ACA</title>
         <meta name="description" content="Portal de gestion para las 134 cooperativas de ACA" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="container-aca">
+      <div className="container-aca backdrop-blur-sm">
         <Header 
-          title="Sistema de Gestión de Cooperativas"
+          title="Portal de Cooperativas"
           subtitle="Dashboard Principal"
         />
 
@@ -234,6 +240,7 @@ export default function Home() {
             </div>
           )}
         </main>
+      </div>
       </div>
     </div>
   );
