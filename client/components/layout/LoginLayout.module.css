@@ -1,0 +1,56 @@
+/* LoginLayout CSS Module */
+.container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(2px);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  z-index: 10;
+}
+
+.footer {
+  width: 100%;
+  background-color: rgb(31, 41, 55);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: auto;
+}
+
+.footer p {
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .footer p {
+    font-size: 1rem;
+  }
+}

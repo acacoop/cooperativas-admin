@@ -1,9 +1,10 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import { useAuth } from '../utils/AuthContext';
 import LoginHeader from '../components/login/LoginHeader';
 import LogoCarousel from '../components/login/LogoCarousel';
+import LoginLayout from '../components/layout/LoginLayout';
+import Aviso from '../components/ui/Aviso';
 
 interface Credentials {
   username: string;
@@ -50,17 +51,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col relative">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[2px]"
-        style={{ backgroundImage: 'url("/background/trigo.jpg")' }}
-      />
-      <div className="absolute inset-0 bg-black/30" />
-      <div className="relative flex flex-col flex-1 z-10">
-      <Head>
-        <title>Login - Sistema ACA Cooperativas</title>
-      </Head>
-      
+    <LoginLayout title="Login - Sistema ACA Cooperativas">
       {/* Header ACA */}
       <LoginHeader />
 
@@ -131,26 +122,18 @@ export default function Login() {
             </form>
 
             {/* Información de usuarios de prueba */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-              <h4 className="font-semibold text-blue-800 mb-2">
-                👥 Usuarios de Prueba (MVP)
-              </h4>
-              <div className="text-sm text-blue-700 space-y-1">
-                <div><strong>Admin ACA:</strong> admin_aca / admin123</div>
-                <div><strong>Operador ACA:</strong> operador_aca / operador123</div>
-                <div><strong>Admin Cooperativa:</strong> admin_coop_1 / coop123</div>
-                <div><strong>🚚 Proveedor:</strong> proveedor_test / proveedor123</div>
-              </div>
-            </div>
+            <Aviso 
+              type="info" 
+              title="👥 Usuarios de Prueba (MVP)"
+            >
+              <div><strong>Admin ACA:</strong> admin_aca / admin123</div>
+              <div><strong>Operador ACA:</strong> operador_aca / operador123</div>
+              <div><strong>Admin Cooperativa:</strong> admin_coop_1 / coop123</div>
+              <div><strong>🚚 Proveedor:</strong> proveedor_test / proveedor123</div>
+            </Aviso>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full bg-gray-800 text-white text-center p-4 mt-auto">
-        <p className="text-sm sm:text-base">&copy; 2025 Asociación de Cooperativas Argentinas - Sistema de Gestión</p>
-      </footer>
-      </div>
-    </div>
+    </LoginLayout>
   );
 }

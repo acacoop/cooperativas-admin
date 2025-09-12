@@ -11,10 +11,8 @@
   );
   color: var(--white);
   position: relative;
-  padding: 3rem 1rem 1.5rem;
+  padding: 3rem 2rem 1.5rem;
   border-radius: 0.75rem 0.75rem 0 0;
-  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
-  width: calc(100% + 3rem);
 }
 
 .header-aca::before {
