@@ -28,6 +28,11 @@
   gap: 1.5rem;
 }
 
+/* Centered grid variant */
+.statsGrid--centered {
+  justify-content: center;
+}
+
 /* Responsive grid */
 @media (min-width: 768px) {
   .statsGrid {
@@ -42,28 +47,28 @@
 }
 
 /* Responsive adjustments for different numbers of items */
-.statsGrid:has(.statCard:nth-child(3):last-child) {
+.statsGrid.statsGrid--threeItems {
   grid-template-columns: repeat(3, 1fr);
 }
 
 @media (min-width: 768px) {
-  .statsGrid:has(.statCard:nth-child(3):last-child) {
+  .statsGrid.statsGrid--threeItems {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.statsGrid:has(.statCard:nth-child(5):last-child) {
+.statsGrid.statsGrid--fiveItems {
   grid-template-columns: repeat(2, 1fr);
 }
 
 @media (min-width: 768px) {
-  .statsGrid:has(.statCard:nth-child(5):last-child) {
+  .statsGrid.statsGrid--fiveItems {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (min-width: 1024px) {
-  .statsGrid:has(.statCard:nth-child(5):last-child) {
+  .statsGrid.statsGrid--fiveItems {
     grid-template-columns: repeat(5, 1fr);
   }
 }

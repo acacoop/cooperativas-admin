@@ -125,6 +125,16 @@
 
 @media (min-width: 768px) {
   .infoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* When CUIT is hidden (supplier variant), show only 3 columns */
+  .infoGrid.supplierGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* When CUIT is shown (cooperative variant), show 4 columns */
+  .infoGrid.cooperativeGrid {
     grid-template-columns: repeat(4, 1fr);
   }
 }

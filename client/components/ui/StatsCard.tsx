@@ -18,7 +18,8 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stat }) => {
   return (
     <div className={`${styles.statCard} ${styles[`statCard--${stat.color}`]}`}>
       <div className={styles.statValue}>
-        {stat.icon ? stat.icon : stat.value}
+        {stat.icon && <span className={styles.statIcon}>{stat.icon}</span>}
+        {stat.value}
       </div>
       <div className={styles.statLabel}>{stat.label}</div>
       <div className={styles.statDescription}>{stat.description}</div>

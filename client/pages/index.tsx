@@ -9,6 +9,7 @@ import MenuCard from '@/components/ui/MenuCard';
 import StatsGrid from '@/components/ui/StatsGrid';
 import { StatItem } from '@/components/ui/StatsCard';
 import MainLayout from '@/components/layout/MainLayout';
+import { Aviso } from '@/components/ui';
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
@@ -223,24 +224,24 @@ export default function Home() {
 
         {/* Información adicional para diferentes roles */}
         {user.role === 'admin_aca' && (
-          <div className="alert-aca alert-info mt-6">
-            <strong>👑 Administrador ACA:</strong> Tienes acceso completo al sistema. 
-            Puedes gestionar todas las cooperativas, aprobar cambios y administrar usuarios.
-          </div>
+          <Aviso type="info" title="👑 Administrador ACA" className='mt-6'>
+            <text>Tienes acceso completo al sistema. 
+            Puedes gestionar todas las cooperativas, aprobar cambios y administrar usuarios.</text>
+          </Aviso>  
         )}
 
         {user.role === 'operador_aca' && (
-          <div className="alert-aca alert-info mt-6">
-            <strong>🔧 Operador ACA:</strong> Puedes consultar información de cooperativas 
-            y asistir en tareas operativas del sistema.
-          </div>
+          <Aviso type="info" title="🔧 Operador ACA" className='mt-6'>
+            <text>Puedes consultar información de cooperativas 
+            y asistir en tareas operativas del sistema.</text>
+          </Aviso>
         )}
 
         {user.role === 'admin_coop' && (
-          <div className="alert-aca alert-success mt-6">
-            <strong>🏢 Administrador de Cooperativa:</strong> Puedes actualizar la información 
-            de tu cooperativa. Los cambios serán revisados por ACA antes de ser aplicados.
-          </div>
+          <Aviso type="success" title="🏢 Administrador de Cooperativa" className='mt-6'>
+            <text>Puedes actualizar la información de tu cooperativa. 
+            Los cambios serán revisados por ACA antes de ser aplicados.</text>
+          </Aviso>
         )}
       </main>
     </MainLayout>

@@ -1,11 +1,11 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
 import api from '../../utils/api';
 import { InvoiceFormData, InvoiceFormItem } from '@/types/forms';
 import { Header } from '@/components/layout/Header';
+import MainLayout from '@/components/layout/MainLayout';
 
 const initialFormData: InvoiceFormData = {
   invoice_number: '',
@@ -176,12 +176,7 @@ export default function NewInvoice() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Head>
-        <title>Nueva Factura - Sistema ACA</title>
-      </Head>
-
-      <div className="container-aca">
+    <MainLayout title='Nueva Factura - Sistema ACA' description='Sube una nueva factura al sistema'>
         <Header 
           title="Subir Nueva Factura"
           subtitle={`Proveedor: ${user.company_name || user.username}`}
@@ -443,7 +438,6 @@ export default function NewInvoice() {
             </form>
           </div>
         </main>
-      </div>
-    </div>
+      </MainLayout>
   );
 }

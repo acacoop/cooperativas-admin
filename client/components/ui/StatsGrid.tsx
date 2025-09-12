@@ -7,14 +7,27 @@ interface StatsGridProps {
   subtitle?: string;
   stats: StatItem[];
   className?: string;
+  centered?: boolean;
 }
 
 export const StatsGrid: React.FC<StatsGridProps> = ({ 
   title = "Estadísticas", 
   subtitle,
   stats, 
-  className = "" 
+  className = "",
+  centered = false
 }) => {
+  // Determine grid class based on number of items
+  const getGridClass = () => {
+    if (!centered) return styles['statsGrid--centered'];
+    
+    const itemCount = stats.length;
+    if (itemCount === 3) return styles['statsGrid--threeItems'];
+    if (itemCount === 5) return styles['statsGrid--fiveItems'];
+    
+    return '';
+  };
+
   return (
     <div className={`${styles.statsContainer} ${className}`}>
       {title && (
@@ -27,7 +40,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
           {subtitle}
         </p>
       )}
-      <div className={styles.statsGrid}>
+      <div className={`${styles.statsGrid} ${getGridClass()}`}>
         {stats.map((stat) => (
           <StatsCard key={stat.id} stat={stat} />
         ))}
