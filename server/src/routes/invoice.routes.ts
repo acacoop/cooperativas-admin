@@ -8,6 +8,7 @@ const invoiceController = new InvoiceController();
 
 // Static routes first
 router.post('/upload', authenticateToken, checkRole(['proveedor']), upload.single('invoice'), invoiceController.upload);
+router.post('/send-to-powerautomate', authenticateToken, checkRole(['proveedor']), upload.single('invoice'), invoiceController.sendToPowerAutomate);
 router.get('/supplier', authenticateToken, checkRole(['proveedor']), invoiceController.getSupplierInvoices);
 router.get('/cooperative', authenticateToken, checkRole(['admin_coop']), invoiceController.getCooperativeInvoices);
 router.get('/export/csv', authenticateToken, checkRole(['admin_coop']), invoiceController.exportToCSV);

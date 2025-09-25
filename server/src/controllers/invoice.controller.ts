@@ -4,6 +4,7 @@ import db from '../config/database';
 import { Invoice, InvoiceItem } from '../types';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 
 export class InvoiceController {
   public async upload(req: AuthRequest & { file?: Express.Multer.File }, res: Response): Promise<void> {
@@ -332,6 +333,69 @@ export class InvoiceController {
     } catch (error) {
       console.error('Download invoice error:', error);
       res.status(500).json({ error: 'Error al descargar factura' });
+    }
+  }
+
+  public async sendToPowerAutomate(req: AuthRequest & { file?: Express.Multer.File }, res: Response): Promise<void> {
+    try {
+      if (req.user?.role !== 'proveedor') {
+        res.status(403).json({ error: 'Solo proveedores pueden enviar facturas' });
+        return;
+      }
+
+      if (!req.file) {
+        res.status(400).json({ error: 'Archivo requerido' });
+        return;
+      }
+
+      // Convertir archivo a base64
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const fileBase64 = fileBuffer.toString('base64');
+      
+      // Preparar datos para Power Automate
+      const powerAutomateData = {
+        filename: req.file.originalname,
+        content: fileBase64
+      };
+
+      // URL del endpoint de Power Automate
+      const powerAutomateUrl = 'https://defaulta7cad06884854149bb950f323bdfa8.9e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/249d4f021fe64a0ca536cc507aa2715a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pd9Gcfkg34yDr8Bmhd7z038JqLRtH5akRhvirdnwRUY';
+
+      console.log('Enviando factura a Power Automate:', req.file.originalname);
+      
+      // Enviar a Power Automate
+      const response = await axios.post(powerAutomateUrl, powerAutomateData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 segundos de timeout
+      });
+
+      console.log('Respuesta de Power Automate:', response.data);
+
+      // Limpiar archivo temporal
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.json({
+        message: 'Factura enviada exitosamente a Power Automate',
+        powerAutomateResponse: response.data,
+        status: response.status
+      });
+
+    } catch (error: any) {
+      console.error('Error enviando a Power Automate:', error);
+      
+      // Limpiar archivo temporal en caso de error
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.status(500).json({ 
+        error: 'Error al enviar factura a Power Automate',
+        details: error.response?.data || error.message
+      });
     }
   }
 }

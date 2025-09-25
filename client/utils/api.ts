@@ -6,7 +6,7 @@ class Api {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
       headers: {
         'Content-Type': 'application/json'
       }
@@ -42,6 +42,19 @@ class Api {
   async uploadInvoice(formData: FormData): Promise<ApiResponse<{ invoice_id: number }>> {
     const { data } = await this.client.post<ApiResponse<{ invoice_id: number }>>(
       '/invoices/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return data;
+  }
+
+  async sendToPowerAutomate(formData: FormData): Promise<ApiResponse<{ powerAutomateResponse: any }>> {
+    const { data } = await this.client.post<ApiResponse<{ powerAutomateResponse: any }>>(
+      '/invoices/send-to-powerautomate',
       formData,
       {
         headers: {

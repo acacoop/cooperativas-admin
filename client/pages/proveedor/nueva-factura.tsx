@@ -22,8 +22,10 @@ export default function NewInvoice() {
   const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingPowerAutomate, setLoadingPowerAutomate] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [powerAutomateResponse, setPowerAutomateResponse] = useState<any>(null);
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -168,6 +170,37 @@ export default function NewInvoice() {
     }
   };
 
+  const handleSendToPowerAutomate = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoadingPowerAutomate(true);
+    setError('');
+    setSuccess('');
+    setPowerAutomateResponse(null);
+
+    if (!file) {
+      setError('Debe seleccionar un archivo PDF');
+      setLoadingPowerAutomate(false);
+      return;
+    }
+
+    try {
+      const submitData = new FormData();
+      submitData.append('invoice', file);
+
+      const response = await api.sendToPowerAutomate(submitData);
+      
+      setSuccess('Factura enviada exitosamente a Power Automate');
+      setPowerAutomateResponse(response);
+      console.log('Respuesta de Power Automate:', response);
+      
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'Error al enviar a Power Automate');
+      console.error('Error:', error);
+    } finally {
+      setLoadingPowerAutomate(false);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     router.push('/login');
@@ -200,13 +233,24 @@ export default function NewInvoice() {
               </div>
             )}
 
+            {/* Respuesta de Power Automate */}
+            {powerAutomateResponse && (
+              <div className="card-aca mb-6 bg-green-50 border-green-200">
+                <h3 className="text-green-800 mb-3">🤖 Respuesta de Power Automate</h3>
+                <pre className="text-sm text-green-700 bg-green-100 p-3 rounded overflow-auto">
+                  {JSON.stringify(powerAutomateResponse, null, 2)}
+                </pre>
+              </div>
+            )}
+
             {/* Información importante */}
             <div className="card-aca mb-6 bg-blue-50 border-blue-200">
               <h3 className="text-blue-800 mb-3">ℹ️ Información importante</h3>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Solo se permiten archivos PDF de hasta 10MB</li>
+                <li>• <strong>Power Automate:</strong> Botón morado para envío directo - solo requiere archivo PDF</li>
+                <li>• <strong>Subir Factura:</strong> Proceso tradicional - requiere todos los datos del formulario</li>
                 <li>• La factura se asignará automáticamente a la cooperativa según el CUIT receptor</li>
-                <li>• Después de subir, deberá validar los datos antes de enviarla</li>
                 <li>• Una vez enviada, la cooperativa podrá aceptar o rechazar la factura</li>
               </ul>
             </div>
@@ -415,25 +459,46 @@ export default function NewInvoice() {
               </div>
 
               {/* Botones */}
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <Link href="/proveedor/facturas" className="btn-aca bg-gray-600 hover:bg-gray-700">
                   ← Cancelar
                 </Link>
                 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-aca"
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="spinner-aca mr-2"></div>
-                      Subiendo...
-                    </div>
-                  ) : (
-                    '📤 Subir Factura'
-                  )}
-                </button>
+                <div className="flex gap-4">
+                  {/* Botón Power Automate (solo requiere archivo) */}
+                  <button
+                    type="button"
+                    onClick={handleSendToPowerAutomate}
+                    disabled={loadingPowerAutomate || !file}
+                    className="btn-aca bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                    title="Enviar directamente a Power Automate (solo requiere archivo PDF)"
+                  >
+                    {loadingPowerAutomate ? (
+                      <div className="flex items-center">
+                        <div className="spinner-aca mr-2"></div>
+                        Enviando a PA...
+                      </div>
+                    ) : (
+                      '🤖 Enviar a Power Automate'
+                    )}
+                  </button>
+
+                  {/* Botón subir tradicional */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-aca"
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="spinner-aca mr-2"></div>
+                        Subiendo...
+                      </div>
+                    ) : (
+                      '📤 Subir Factura'
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
