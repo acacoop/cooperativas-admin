@@ -136,6 +136,75 @@ class Api {
       filename
     };
   }
+
+  // Attachments
+  async uploadAttachments(invoiceId: number, formData: FormData): Promise<ApiResponse<{ attachment_ids: number[]; count: number }>> {
+    const { data } = await this.client.post<ApiResponse<{ attachment_ids: number[]; count: number }>>(
+      `/invoices/${invoiceId}/attachments`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return data;
+  }
+
+  async downloadAttachment(invoiceId: number, attachmentId: number): Promise<{ blob: Blob; filename: string }> {
+    const response = await this.client.get(`/invoices/${invoiceId}/attachments/${attachmentId}/download`, {
+      responseType: 'blob',
+      headers: {
+        Accept: 'application/octet-stream'
+      }
+    });
+    
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = 'adjunto';
+    if (contentDisposition) {
+      const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+      if (matches != null && matches[1]) {
+        filename = matches[1].replace(/['"]/g, '');
+      }
+    }
+
+    return { 
+      blob: response.data,
+      filename
+    };
+  }
+
+  async deleteAttachment(invoiceId: number, attachmentId: number): Promise<ApiResponse<void>> {
+    const { data } = await this.client.delete<ApiResponse<void>>(`/invoices/${invoiceId}/attachments/${attachmentId}`);
+    return data;
+  }
+
+  // Admin - Cooperative Activation
+  async activateCooperative(
+    cooperativeId: number,
+    userData: {
+      username: string;
+      email: string;
+      full_name: string;
+      password: string;
+    }
+  ): Promise<ApiResponse<{ cooperative_id: number; admin_user_id: number; username: string; email: string }>> {
+    const { data } = await this.client.post<ApiResponse<{ cooperative_id: number; admin_user_id: number; username: string; email: string }>>(
+      `/admin/cooperatives/${cooperativeId}/activate`,
+      userData
+    );
+    return data;
+  }
+
+  async deactivateCooperative(cooperativeId: number): Promise<ApiResponse<void>> {
+    const { data } = await this.client.post<ApiResponse<void>>(`/admin/cooperatives/${cooperativeId}/deactivate`);
+    return data;
+  }
+
+  async getCooperativeStats(): Promise<{ total: number; active: number; inactive: number }> {
+    const { data } = await this.client.get<{ total: number; active: number; inactive: number }>('/admin/cooperatives/stats');
+    return data;
+  }
 }
 
 const api = new Api();

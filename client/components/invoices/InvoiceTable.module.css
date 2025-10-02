@@ -1,0 +1,327 @@
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Scrollbar personalizado */
+.tableWrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  min-width: 1200px;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
+.table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  border-bottom: 2px solid #1f2937;
+}
+
+.table tbody tr {
+  background: white;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+  box-shadow: inset 0 0 0 1px #e5e7eb;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table td {
+  padding: 14px 12px;
+  color: #374151;
+  vertical-align: middle;
+  font-size: 0.875rem;
+}
+
+.tableRow {
+  cursor: pointer;
+}
+
+/* Alineaciones */
+.alignRight {
+  text-align: right;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+/* Celdas especiales */
+.invoiceNumber {
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Courier New', monospace;
+}
+
+.cuitCell {
+  font-family: 'Courier New', monospace;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.totalCell {
+  font-weight: 700;
+  color: #059669;
+  font-size: 0.95rem;
+}
+
+/* Status badges */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.statusPending {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.statusSent {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e3a8a;
+  border: 1px solid #60a5fa;
+}
+
+.statusAccepted {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #34d399;
+}
+
+.statusRejected {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+
+.statusCorrected {
+  background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+  color: #6b21a8;
+  border: 1px solid #a855f7;
+}
+
+.statusDefault {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #4b5563;
+  border: 1px solid #9ca3af;
+}
+
+/* Actions cell */
+.actionsCell {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actionsCell a,
+.actionsCell button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btnValidate {
+  background: #3b82f6;
+  color: white;
+}
+
+.btnValidate:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btnCorrect {
+  background: #f59e0b;
+  color: white;
+}
+
+.btnCorrect:hover {
+  background: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+.btnReview {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btnReview:hover {
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+}
+
+.btnDownload {
+  background: #10b981;
+  color: white;
+}
+
+.btnDownload:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btnDetails {
+  background: #6b7280;
+  color: white;
+}
+
+.btnDetails:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+/* Empty state */
+.emptyState {
+  padding: 60px 20px !important;
+  text-align: center;
+}
+
+.emptyContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.emptyContent p {
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Table footer */
+.tableFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-top: 2px solid #e5e7eb;
+}
+
+.footerInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footerLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.footerValue {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tableWrapper {
+    max-height: 500px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 0.75rem;
+  }
+
+  .actionsCell a,
+  .actionsCell button {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+
+  .tableFooter {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table {
+    min-width: 1000px;
+  }
+}

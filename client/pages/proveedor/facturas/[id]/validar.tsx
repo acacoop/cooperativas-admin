@@ -12,6 +12,7 @@ import { InvoiceDetails } from '@/components/invoices/InvoiceDetails';
 import { InvoiceItemDetails } from '@/components/invoices/InvoiceItemDetails';
 import { InvoiceTotals } from '@/components/invoices/InvoiceTotals';
 import { Aviso } from '@/components/ui';
+import { InvoiceAttachments } from '@/components/invoices/InvoiceAttachments';
 
 interface InvoiceData extends Invoice {
   id: number;
@@ -149,6 +150,14 @@ export default function ValidateInvoice() {
                 <InvoiceItemDetails items={items} />
                 
                 <InvoiceTotals invoice={invoice} />
+                
+                {/* Attachments - Proveedor puede subir y eliminar */}
+                <InvoiceAttachments 
+                  invoiceId={invoice.id} 
+                  attachments={invoice.attachments || []} 
+                  canUpload={true}
+                  onAttachmentsChange={loadInvoiceData}
+                />
                 
                 {/* Información importante */}
                 <Aviso title='⚠️ Importante' type='warning' className='border-yellow-200 text-yellow-700'>

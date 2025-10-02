@@ -6,6 +6,7 @@ import 'dotenv/config';
 import authRoutes from './routes/auth.routes';
 import cooperativeRoutes from './routes/cooperative.routes';
 import invoiceRoutes from './routes/invoice.routes';
+import adminRoutes from './routes/admin.routes';
 import db from './config/database';
 
 const app = express();
@@ -25,6 +26,7 @@ db.initTables().catch(console.error);
 app.use('/api/auth', authRoutes);
 app.use('/api/cooperatives', cooperativeRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

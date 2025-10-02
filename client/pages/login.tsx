@@ -18,8 +18,8 @@ export default function Login() {
   }, [user, loading]);
 
   return (
-    <LoginLayout title="Login - Sistema ACA Cooperativas">
-      {/* Header ACA */}
+    <LoginLayout title="Login - Proveedores">
+      {/* Header */}
       <LoginHeader />
 
       {/* Contenido principal */}

@@ -76,6 +76,11 @@ export function InvoiceCard({
           <div className={styles.header}>
             <h3 className={styles.title}>
               Factura #{invoice.invoice_number}
+              {invoice.attachments && invoice.attachments.length > 0 && (
+                <span className={styles.attachmentBadge} title={`${invoice.attachments.length} documento(s) adicional(es)`}>
+                  📎 {invoice.attachments.length}
+                </span>
+              )}
             </h3>
             {getStatusBadge(invoice.status)}
           </div>

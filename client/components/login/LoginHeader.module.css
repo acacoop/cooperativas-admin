@@ -1,7 +1,7 @@
 .header-aca {
-  --aca-blue: #282d87;
-  --aca-orange: #ff9100;
-  --aca-blue-dark: #1f2366;
+  --aca-blue: #4a5568;
+  --aca-orange: #6b7280;
+  --aca-blue-dark: #2d3748;
   --white: #ffffff;
   width: 100%;
   background: linear-gradient(
@@ -12,6 +12,7 @@
   color: var(--white);
   position: relative;
   padding: 1rem 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .header-content {

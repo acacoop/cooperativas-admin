@@ -1,0 +1,119 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.cardBlue {
+  border-left-color: #3b82f6;
+}
+
+.cardGreen {
+  border-left-color: #10b981;
+}
+
+.cardRed {
+  border-left-color: #ef4444;
+}
+
+.cardOrange {
+  border-left-color: #f59e0b;
+}
+
+.cardPurple {
+  border-left-color: #8b5cf6;
+}
+
+.cardGray {
+  border-left-color: #6b7280;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.trendPositive {
+  color: #10b981;
+}
+
+.trendNegative {
+  color: #ef4444;
+}
+
+.trendIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.trendValue {
+  font-weight: 700;
+}
+
+.trendLabel {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+  }
+
+  .value {
+    font-size: 2rem;
+  }
+
+  .icon {
+    font-size: 1.5rem;
+  }
+}

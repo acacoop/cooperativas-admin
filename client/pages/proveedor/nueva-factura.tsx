@@ -209,7 +209,7 @@ export default function NewInvoice() {
   if (!user) return null;
 
   return (
-    <MainLayout title='Nueva Factura - Sistema ACA' description='Sube una nueva factura al sistema'>
+    <MainLayout title='Nueva Factura - Proveedores' description='Sube una nueva factura al sistema'>
         <Header 
           title="Subir Nueva Factura"
           subtitle={`Proveedor: ${user.company_name || user.username}`}

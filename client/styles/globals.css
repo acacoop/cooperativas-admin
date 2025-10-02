@@ -2,24 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Variables CSS - Colores ACA */
-/* ACA = Asociación de Cooperativas Argentinas */
+/* Variables CSS - Paleta Industrial y Campo */
 :root {
-  --aca-blue: #282d87;
-  --aca-orange: #ff9100;
-  --aca-blue-light: #3a4199;
-  --aca-blue-dark: #1f2366;
-  --aca-orange-light: #ffb366;
-  --aca-orange-dark: #e67e00;
+  /* Colores principales - Grises industriales */
+  --aca-blue: #4a5568;          /* Gris pizarra oscuro */
+  --aca-orange: #6b7280;        /* Gris medio */
+  --aca-blue-light: #6b7280;    /* Gris medio */
+  --aca-blue-dark: #2d3748;     /* Gris carbón */
+  --aca-orange-light: #9ca3af;  /* Gris claro */
+  --aca-orange-dark: #4b5563;   /* Gris oscuro */
+  
+  /* Colores base */
   --white: #ffffff;
-  --light-gray: #f8f9fa;
-  --medium-gray: #e9ecef;
-  --dark-gray: #333333;
-  --text-gray: #555555;
-  --border-gray: #e0e0e0;
-  --success-green: #28a745;
-  --error-red: #dc3545;
-  --warning-yellow: #ffc107;
+  --light-gray: #f9fafb;
+  --medium-gray: #e5e7eb;
+  --dark-gray: #1f2937;
+  --text-gray: #374151;
+  --border-gray: #d1d5db;
+  
+  /* Colores de estado */
+  --success-green: #059669;     /* Verde campo */
+  --error-red: #dc2626;
+  --warning-yellow: #d97706;    /* Ocre tierra */
 }
 
 * {
@@ -34,8 +38,8 @@ body {
   line-height: 1.6;
   color: var(--dark-gray);
   background: linear-gradient(
-      rgba(245, 245, 245, 0.95),
-      rgba(245, 245, 245, 0.95)
+      rgba(249, 250, 251, 0.98),
+      rgba(243, 244, 246, 0.98)
     );
   min-height: 100vh;
 }
@@ -53,7 +57,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Header ACA */
+/* Header - Estilo Industrial */
 .header-aca {
   background: linear-gradient(
     135deg,
@@ -66,6 +70,7 @@ body {
   margin: -20px -20px 20px -20px;
   text-align: center;
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-aca::before {

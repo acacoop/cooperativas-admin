@@ -20,4 +20,9 @@ router.get('/:id/download', authenticateToken, invoiceController.downloadInvoice
 router.put('/:id/validate', authenticateToken, checkRole(['proveedor']), invoiceController.validateInvoice);
 router.put('/:id/respond', authenticateToken, checkRole(['admin_coop']), invoiceController.respondToInvoice);
 
+// Attachment routes
+router.post('/:id/attachments', authenticateToken, checkRole(['proveedor']), upload.array('attachments', 10), invoiceController.uploadAttachments as any);
+router.get('/:id/attachments/:attachmentId/download', authenticateToken, invoiceController.downloadAttachment as any);
+router.delete('/:id/attachments/:attachmentId', authenticateToken, checkRole(['proveedor']), invoiceController.deleteAttachment as any);
+
 export default router;

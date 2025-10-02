@@ -5,7 +5,8 @@ export const LoginHeader = () => {
   return (
     <header className={styles['header-aca']}>
       <div className={styles['header-content']}>
-        <div className={styles['aca-brand']}>
+        {/* Logos ocultos temporalmente */}
+        {/* <div className={styles['aca-brand']}>
           <div className={`${styles['logo-container']} ${styles['aca-container']}`}>
             <Image 
               src="/logos/aca-logo.jpeg" 
@@ -16,9 +17,9 @@ export const LoginHeader = () => {
               priority 
             />
           </div>
-        </div>
-        <h1 className={styles['header-title']}>Portal de las Cooperativas del Campo Argentino</h1>
-        <div className={styles['aca-brand']}>
+        </div> */}
+        <h1 className={styles['header-title']}>Proveedores</h1>
+        {/* <div className={styles['aca-brand']}>
           <div className={styles['logo-container']}>
             <Image 
               src="/logos/gpi-logo.png" 
@@ -29,7 +30,7 @@ export const LoginHeader = () => {
               priority 
             />
           </div>
-        </div>
+        </div> */}
       </div>
     </header>
   );

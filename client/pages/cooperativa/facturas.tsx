@@ -6,9 +6,11 @@ import { useAuth } from '@/utils/AuthContext';
 import api from '@/utils/api';
 import { Invoice, InvoiceStatus } from '@/types';
 import { InvoiceCard } from '@/components/invoices/InvoiceCard';
+import { InvoiceTable } from '@/components/invoices/InvoiceTable';
 import { Header } from '@/components/layout/Header';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
+type ViewMode = 'cards' | 'table';
 
 interface StatusConfig {
   color: string;
@@ -21,6 +23,7 @@ export default function CooperativeInvoices() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('todas');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -141,14 +144,45 @@ export default function CooperativeInvoices() {
               </select>
             </div>
             
-            <div className="flex space-x-3">
+            <div className="flex items-center gap-3">
+              {/* Botón de métricas */}
+              <Link 
+                href="/cooperativa/metricas" 
+                className="btn-aca bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-sm"
+              >
+                📊 Ver Métricas
+              </Link>
+              {/* Toggle de vista */}
+              <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-4 py-2 rounded-md font-medium transition-all text-sm ${
+                    viewMode === 'cards'
+                      ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  🗂️ Tarjetas
+                </button>
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`px-4 py-2 rounded-md font-medium transition-all text-sm ${
+                    viewMode === 'table'
+                      ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  📊 Tabla
+                </button>
+              </div>
+              
               <a
                 href="/api/invoices/export/csv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-aca text-sm bg-green-600 hover:bg-green-700"
               >
-                📊 Exportar CSV (Aceptadas)
+                📊 Exportar CSV
               </a>
             </div>
           </div>
@@ -250,7 +284,30 @@ export default function CooperativeInvoices() {
                 </button>
               )}
             </div>
+          ) : viewMode === 'table' ? (
+            // Vista de Tabla
+            <InvoiceTable 
+              invoices={filteredInvoices}
+              variant="cooperative"
+              onDownload={async (id: number) => {
+                try {
+                  const { blob, filename } = await api.downloadInvoice(id);
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = filename;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                } catch (error) {
+                  console.error('Error downloading invoice:', error);
+                  alert('Error al descargar la factura');
+                }
+              }}
+            />
           ) : (
+            // Vista de Tarjetas
             <div className="space-y-4">
               {filteredInvoices.map((invoice) => (
                 <InvoiceCard

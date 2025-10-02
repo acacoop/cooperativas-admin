@@ -10,6 +10,7 @@ import { InvoiceDetails } from '@/components/invoices/InvoiceDetails';
 import { InvoiceItemDetails } from '@/components/invoices/InvoiceItemDetails';
 import { InvoiceTotals } from '@/components/invoices/InvoiceTotals';
 import { InvoiceStatusBadge } from '@/components/invoices/InvoiceStatusBadge';
+import { InvoiceAttachments } from '@/components/invoices/InvoiceAttachments';
 
 interface InvoiceDetailProps {
   invoice: Invoice & { id: number };
@@ -163,6 +164,14 @@ export default function InvoiceDetail() {
 
                 {/* Totals */}
                 <InvoiceTotals invoice={invoice} />
+
+                {/* Attachments - Solo lectura para cooperativa */}
+                <InvoiceAttachments 
+                  invoiceId={invoice.id} 
+                  attachments={invoice.attachments || []} 
+                  canUpload={false}
+                  onAttachmentsChange={() => loadInvoiceData(invoice.id)}
+                />
 
                 {/* Actions */}
                 {invoice.status === 'pendiente_validacion' && (

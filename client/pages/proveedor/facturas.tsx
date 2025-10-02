@@ -10,9 +10,11 @@ import MainLayout from '@/components/layout/MainLayout';
 import FilterCard, { FilterOption } from '@/components/ui/FilterCard';
 import ScrollView from '@/components/ui/ScrollView';
 import { InvoiceCard } from '@/components/invoices/InvoiceCard';
+import { InvoiceTable } from '@/components/invoices/InvoiceTable';
 import { Alert, LoadingSpinner } from '@/components/ui';
 
 type FilterStatus = InvoiceStatus | 'todas';
+type ViewMode = 'cards' | 'table';
 
 interface StatusConfig {
   color: string;
@@ -25,6 +27,7 @@ export default function SupplierInvoices() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<FilterStatus>('todas');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -156,6 +159,23 @@ export default function SupplierInvoices() {
     </div>
   );
 
+  const handleDownload = async (id: number) => {
+    try {
+      const { blob, filename } = await api.downloadInvoice(id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Error al descargar la factura');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     router.push('/login');
@@ -175,11 +195,44 @@ export default function SupplierInvoices() {
 
         {/* Contenido principal */}
         <main className="p-6">
-          {/* Botón para nueva factura */}
-          <div className="mb-6">
-            <Link href="/proveedor/nueva-factura" className="btn-aca">
-              ➕ Subir Nueva Factura
-            </Link>
+          {/* Barra de acciones superior */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex gap-3">
+              <Link href="/proveedor/nueva-factura" className="btn-aca">
+                ➕ Subir Nueva Factura
+              </Link>
+              
+              <Link 
+                href="/proveedor/metricas" 
+                className="btn-aca bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+              >
+                📊 Ver Métricas
+              </Link>
+            </div>
+            
+            {/* Toggle de vista */}
+            <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-4 py-2 rounded-md font-medium transition-all ${
+                  viewMode === 'cards'
+                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                🗂️ Tarjetas
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-2 rounded-md font-medium transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                📊 Tabla
+              </button>
+            </div>
           </div>
 
           {/* Estadísticas rápidas - Ahora son botones de filtro */}
@@ -224,7 +277,15 @@ export default function SupplierInvoices() {
                 Ver Todas las Facturas
               </button>
             </div>
+          ) : viewMode === 'table' ? (
+            // Vista de Tabla
+            <InvoiceTable 
+              invoices={filteredInvoices}
+              variant="supplier"
+              onDownload={handleDownload}
+            />
           ) : (
+            // Vista de Tarjetas
             <ScrollView height="600px">
               <div className="space-y-4">
                 {filteredInvoices.map((invoice) => (
