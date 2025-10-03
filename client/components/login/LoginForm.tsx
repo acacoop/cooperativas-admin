@@ -99,7 +99,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
           </button>
         </form>
 
-        {/* Información de usuarios de prueba */}
+        {/* Información de usuarios de prueba 
         <Aviso 
           type="info" 
           title="👥 Usuarios de Prueba (MVP)"
@@ -109,6 +109,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
           <div><strong>Admin Cooperativa:</strong> admin_coop_1 / coop123</div>
           <div><strong>🚚 Proveedor:</strong> proveedor_test / proveedor123</div>
         </Aviso>
+        */}
       </div>
     </div>
   );

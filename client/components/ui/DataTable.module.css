@@ -1,0 +1,171 @@
+/* DataTable Component Styles */
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.emptyContainer {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 3rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.emptyTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.emptyDescription {
+  color: #6b7280;
+}
+
+.table {
+  min-width: 100%;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed; /* Fixed layout for better column control */
+}
+
+.tableHead {
+  background-color: #f9fafb;
+}
+
+.tableHeader {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tableBody {
+  background-color: #ffffff;
+}
+
+.tableRow {
+  transition: background-color 150ms ease-in-out;
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.tableRow:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tableCell {
+  padding: 1rem 1.5rem;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Specific cell width constraints */
+.tableCell:first-child {
+  width: 10%; /* Code column */
+}
+
+.tableCell:nth-child(2) {
+  width: 35%; /* Name column */
+}
+
+.tableCell:nth-child(3) {
+  width: 15%; /* CUIT column */
+}
+
+.tableCell:nth-child(4) {
+  width: 15%; /* CAR column */
+}
+
+.tableCell:nth-child(5) {
+  width: 12%; /* Status column */
+}
+
+.tableCell:nth-child(6) {
+  width: 13%; /* Actions column */
+  min-width: 120px; /* Ensure minimum width for actions */
+}
+
+/* Text alignment classes */
+.textLeft {
+  text-align: left;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.textRight {
+  text-align: right;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tableHeader {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .tableCell {
+    padding: 0.75rem 0.75rem;
+  }
+
+  /* Adjust column widths for mobile */
+  .tableCell:first-child {
+    width: 8%; /* Code column - smaller on mobile */
+  }
+
+  .tableCell:nth-child(2) {
+    width: 40%; /* Name column - larger on mobile */
+  }
+
+  .tableCell:nth-child(3) {
+    width: 12%; /* CUIT column */
+  }
+
+  .tableCell:nth-child(4) {
+    width: 10%; /* CAR column */
+  }
+
+  .tableCell:nth-child(5) {
+    width: 12%; /* Status column */
+  }
+
+  .tableCell:nth-child(6) {
+    width: 18%; /* Actions column - larger on mobile */
+    min-width: 100px;
+  }
+
+  .emptyContainer {
+    padding: 2rem 1rem;
+  }
+
+  .emptyIcon {
+    font-size: 3rem;
+  }
+
+  .emptyTitle {
+    font-size: 1.125rem;
+  }
+}

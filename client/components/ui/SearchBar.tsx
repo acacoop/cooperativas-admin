@@ -9,6 +9,7 @@ interface SearchBarProps {
   icon?: string;
   className?: string;
   disabled?: boolean;
+  compact?: boolean; // New prop for inline usage
 }
 
 export default function SearchBar({
@@ -18,7 +19,8 @@ export default function SearchBar({
   helpText,
   icon = "🔍",
   className = "",
-  disabled = false
+  disabled = false,
+  compact = false
 }: SearchBarProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
@@ -28,6 +30,36 @@ export default function SearchBar({
     onChange('');
   };
 
+  // Compact version for inline usage
+  if (compact) {
+    return (
+      <div className={`${styles.compactWrapper} ${className}`}>
+        <div className={styles.compactInputWrapper}>
+          <span className={styles.compactIcon}>{icon}</span>
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={handleChange}
+            disabled={disabled}
+            className={styles.compactInput}
+          />
+          {value && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={styles.compactClearButton}
+              aria-label="Limpiar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Original full version
   return (
     <div className={`${styles.container} ${className}`}>
       <div className={styles.searchGroup}>

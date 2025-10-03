@@ -1,0 +1,156 @@
+/* Modal Component Styles */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 2rem 0;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Size variants */
+.modal--sm {
+  max-width: 24rem; /* 384px */
+}
+
+.modal--md {
+  max-width: 32rem; /* 512px */
+}
+
+.modal--lg {
+  max-width: 42rem; /* 672px */
+}
+
+.modal--xl {
+  max-width: 48rem; /* 768px */
+}
+
+.modal--2xl {
+  max-width: 56rem; /* 896px */
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.25;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  color: #374151;
+  background-color: #f3f4f6;
+}
+
+.closeButton:focus {
+  outline: none;
+  color: #374151;
+  background-color: #e5e7eb;
+}
+
+/* Content */
+.content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .backdrop {
+    padding: 0.5rem;
+  }
+  
+  .modal {
+    margin: 1rem 0;
+    max-height: 95vh;
+  }
+  
+  .header {
+    padding: 1rem 1rem 0 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+  }
+  
+  .content {
+    padding: 0 1rem 1rem 1rem;
+  }
+  
+  .closeButton {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1rem;
+  }
+}
+
+/* Focus trap for accessibility */
+.modal:focus {
+  outline: none;
+}

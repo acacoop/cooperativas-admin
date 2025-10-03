@@ -69,10 +69,35 @@ export default function Home() {
       title="Proveedores - Sistema de Gestión"
       description="Portal de gestión para proveedores"
     >
-      <Header 
-        title="Proveedores"
-        subtitle="Dashboard Principal"
-      />
+
+      {user.role == "proveedor" && (
+        <Header 
+          title="Proveedores"
+          subtitle="Dashboard Principal"
+        />
+      )}
+
+      {user.role == "admin_coop" && (
+        <Header 
+          title="Cooperativas"
+          subtitle="Dashboard Principal"
+        />
+      )}
+
+      {user.role == "admin_aca" && (
+        <Header 
+          title="Administración ACA"
+          subtitle="Dashboard Principal"
+        />
+      )}
+
+      {user.role == "operador_aca" && (
+        <Header 
+          title="Operador ACA"
+          subtitle="Dashboard Principal"
+        />
+      )}
+      
 
       {/* Contenido principal */}
       <main className="p-6 sm:p-8 lg:p-10">
