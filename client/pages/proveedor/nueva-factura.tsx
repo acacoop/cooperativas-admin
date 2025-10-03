@@ -24,6 +24,7 @@ const initialFormData: InvoiceFormData = {
 export default function NewInvoice() {
   const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
   const [file, setFile] = useState<File | null>(null);
+  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingPowerAutomate, setLoadingPowerAutomate] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -71,6 +72,14 @@ export default function NewInvoice() {
         total_amount: total.toFixed(2)
       }));
     }
+  };
+
+  // Handler for DataEntryField components
+  const handleFieldChange = (fieldName: string) => (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
   };
 
   const handleItemChange = (index: number, field: keyof InvoiceFormItem, value: string) => {
@@ -129,6 +138,23 @@ export default function NewInvoice() {
         return;
       }
       setFile(selectedFile);
+      setError('');
+    }
+  };
+
+  const handleAdditionalFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    for (const file of e.target.files) {
+      if (file.type !== 'application/pdf' && file.type !== 'image/png' && file.type !== 'image/jpeg') {
+        setError('Solo se permiten archivos PDF, PNG y JPEG');
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) { // 25MB
+        setError('El archivo no puede ser mayor a 25MB');
+        return;
+      }
+      setAdditionalFiles(prev => [...prev, file]);
       setError('');
     }
   };
@@ -265,13 +291,16 @@ export default function NewInvoice() {
 
               <DataEntryCard
                 title="📝 Datos de la Factura"
-                classname="card-aca"
+                className="card-aca"
+                gridCols='2'
               >
                 <DataEntryField
                   label="Concepto de Factura *"
                   fieldType='input'
+                  id="invoice_number"
+                  name="invoice_number"
                   value={formData.invoice_number}
-                  onChange={handleInputChange}
+                  onChange={handleFieldChange('invoice_number')}
                   placeholder="Concepto de la factura"
                   required
                   className='form-group-aca'
@@ -279,8 +308,10 @@ export default function NewInvoice() {
                 <DataEntryField
                   label="Centro o Sucursal *"
                   fieldType='input'
+                  id="issue_date"
+                  name="issue_date"
                   value={formData.issue_date}
-                  onChange={handleInputChange}
+                  onChange={handleFieldChange('issue_date')}
                   placeholder="Centro o Sucursal"
                   required
                   className='form-group-aca'
@@ -288,40 +319,46 @@ export default function NewInvoice() {
                 <DataEntryField
                   label="Campo Opcional"
                   fieldType='input'
+                  id="issuer_cuit"
+                  name="issuer_cuit"
                   value={formData.issuer_cuit}
-                  onChange={handleInputChange}
+                  onChange={handleFieldChange('issuer_cuit')}
                   placeholder=""
                   className='form-group-aca'
                 />
                 <DataEntryField
                   label="Campo Opcional"
                   fieldType='input'
+                  id="receiver_cuit"
+                  name="receiver_cuit"
                   value={formData.receiver_cuit}
-                  onChange={handleInputChange}
+                  onChange={handleFieldChange('receiver_cuit')}
                   placeholder=""
                   className='form-group-aca'
                 />
               </DataEntryCard>
 
               {/* Archivo */}
-              <div className="card-aca">
-                <h3 className="mb-4">📄 Archivo PDF de la Factura</h3>
-                <div className="form-group-aca">
-                  <label htmlFor="invoice_file">Subir Factura (PDF) *</label>
-                  <input
-                    id="invoice_file"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  {file && (
-                    <p className="text-sm text-green-600 mt-2">
-                      ✅ Archivo seleccionado: {file.name}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <DataEntryCard
+                title="📄 Archivo PDF de la Factura"
+                className="card-aca"
+              >
+                <DataEntryField
+                  label="Subir Factura (PDF) *"
+                  fieldType='file'
+                  id="invoice_file"
+                  name="invoice_file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  required
+                  className='form-group-aca'
+                />
+                {file && (
+                  <p className="text-sm text-green-600 mt-2">
+                    ✅ Archivo seleccionado: {file.name}
+                  </p>
+                )}
+              </DataEntryCard>
 
               <div className="card-aca">
                 <h3 className="mb-4">📎 Documentos adicionales de la Factura</h3>
@@ -330,13 +367,14 @@ export default function NewInvoice() {
                   <input
                     id="additional_documents"
                     type="file"
+                    multiple
                     accept=".pdf, .png, .jpg"
-                    onChange={handleFileChange}
+                    onChange={handleAdditionalFilesChange}
                     className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
-                  {file && (
+                  {additionalFiles.length > 0 && (
                     <p className="text-sm text-green-600 mt-2">
-                      ✅ Archivo seleccionado: {file.name}
+                      ✅ Archivos seleccionados: {additionalFiles.map(f => f.name).join(', ')}
                     </p>
                   )}
                 </div>

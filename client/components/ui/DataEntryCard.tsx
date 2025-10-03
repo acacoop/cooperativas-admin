@@ -2,7 +2,7 @@ interface DataEntryCardProps {
     title: string;
     subtitle?: string;
     children?: React.ReactNode;
-    classname?: string;
+    className?: string;
     gridCols?: 'auto' | '1' | '2' | '3' | '4';
     // Add other props as needed
 }
@@ -12,8 +12,8 @@ export const DataEntryCard = ({
     title, 
     subtitle, 
     children, 
-    classname,
-    gridCols = '2' 
+    className,
+    gridCols = 'auto' 
 }: DataEntryCardProps) => {
     const getGridClasses = () => {
         switch (gridCols) {
@@ -33,7 +33,7 @@ export const DataEntryCard = ({
     };
 
     return (
-        <div className={`${classname}`}>
+        <div className={`${className}`}>
             <h3 className="mb-4">{title}</h3>
             {subtitle && <h4 className="mb-4">{subtitle}</h4>}
             <div className={getGridClasses()}>
