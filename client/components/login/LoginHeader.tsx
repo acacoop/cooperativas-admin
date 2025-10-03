@@ -18,7 +18,7 @@ export const LoginHeader = () => {
             />
           </div>
         </div> */}
-        <h1 className={styles['header-title']}>Portal de Proveedores - Cooperativas</h1>
+        <h1 className={styles['header-title']}>Portal de Proveedores</h1>
         {/* <div className={styles['aca-brand']}>
           <div className={styles['logo-container']}>
             <Image 

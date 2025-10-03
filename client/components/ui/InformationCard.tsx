@@ -2,7 +2,7 @@ import React from 'react';
 
 interface InformationCardProps {
   title?: string;
-  items: string[];
+  items: (string | React.ReactNode)[];
   variant?: 'info' | 'warning' | 'success' | 'error';
   className?: string;
 }

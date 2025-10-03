@@ -7,7 +7,7 @@ export interface FilterOption {
 }
 
 interface FilterSelectorProps {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   options: FilterOption[];
   placeholder?: string;

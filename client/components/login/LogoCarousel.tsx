@@ -6,7 +6,7 @@ import { getCoopLogos, type Logo } from '@/utils/getCoopLogos';
 // Main logos that should always be shown (temporalmente ocultos)
 const mainLogos: Logo[] = [
   // { src: '/logos/aca-logo.jpeg', alt: 'ACA Logo' },
-  // { src: '/logos/gpi-logo.png', alt: 'GPI Logo' },
+  { src: '/logos/gpi-logo.png', alt: 'GPI Logo' },
 ];
 
 // Combine main logos with cooperative logos

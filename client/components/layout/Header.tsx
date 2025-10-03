@@ -47,7 +47,7 @@ export function Header({ title, subtitle, backUrl, backLabel }: HeaderProps) {
         <div className={styles['aca-brand']}>
           <div className={styles['aca-logo']}>
             <Image 
-              src="/logos/aca-logo.jpeg" 
+              src="/logos/gpi-logo.png" 
               alt="ACA Logo" 
               width={80} 
               height={80} 
