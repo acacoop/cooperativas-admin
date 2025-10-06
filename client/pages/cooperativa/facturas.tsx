@@ -9,7 +9,7 @@ import { InvoiceCard } from '@/components/invoices/InvoiceCard';
 import { InvoiceTable } from '@/components/invoices/InvoiceTable';
 import { Header } from '@/components/layout/Header';
 import MainLayout from '@/components/layout/MainLayout';
-import { FilterSelector } from '@/components/ui';
+import { Alert, Button, FilterSelector, ScrollView } from '@/components/ui';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
 type ViewMode = 'cards' | 'table';
@@ -148,12 +148,13 @@ export default function CooperativeInvoices() {
 
               <div className="flex items-center gap-3">
                 {/* Botón de métricas */}
-                <Link 
-                  href="/cooperativa/metricas" 
-                  className="btn-aca bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-sm"
+                <Button
+                  onClick={() => router.push('/cooperativa/metricas')}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-sm"
                 >
                   📊 Ver Métricas
-                </Link>
+                </Button>
+                
                 {/* Toggle de vista */}
                 <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
                   <button
@@ -177,15 +178,14 @@ export default function CooperativeInvoices() {
                     📊 Tabla
                   </button>
                 </div>
-                    
-                <a
-                  href="/api/invoices/export/csv"
-                  target="_blank"
+                
+                <Button
+                  onClick={() => window.open('/api/invoices/export/csv', '_blank')}
+                  className="bg-green-600 hover:bg-green-700 text-sm"
                   rel="noopener noreferrer"
-                  className="btn-aca text-sm bg-green-600 hover:bg-green-700"
                 >
                   📊 Exportar CSV
-                </a>
+                </Button>
               </div>
             </div>
 
@@ -254,9 +254,11 @@ export default function CooperativeInvoices() {
 
             {/* Alerts */}
             {error && (
-              <div className="alert-aca alert-error mb-6">
-                {error}
-              </div>
+              <Alert 
+                type='error'
+                message={error}
+                className='mb-6'
+              />
             )}
 
             {/* Invoice list */}
@@ -311,14 +313,16 @@ export default function CooperativeInvoices() {
             ) : (
               // Vista de Tarjetas
               <div className="space-y-4">
-                {filteredInvoices.map((invoice) => (
-                  <InvoiceCard
-                    key={invoice.id}
-                    invoice={invoice}
-                    onResponse={handleInvoiceResponse}
-                    getStatusBadge={getStatusBadge}
-                  />
-                ))}
+                <ScrollView>
+                  {filteredInvoices.map((invoice) => (
+                    <InvoiceCard
+                      key={invoice.id}
+                      invoice={invoice}
+                      onResponse={handleInvoiceResponse}
+                      getStatusBadge={getStatusBadge}
+                    />
+                  ))}
+                </ScrollView>
               </div>
             )}
           </main>

@@ -11,6 +11,8 @@ import { InvoiceItemDetails } from '@/components/invoices/InvoiceItemDetails';
 import { InvoiceTotals } from '@/components/invoices/InvoiceTotals';
 import { InvoiceStatusBadge } from '@/components/invoices/InvoiceStatusBadge';
 import { InvoiceAttachments } from '@/components/invoices/InvoiceAttachments';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Alert, Button, LoadingSpinner, Modal } from '@/components/ui';
 
 interface InvoiceDetailProps {
   invoice: Invoice & { id: number };
@@ -114,12 +116,12 @@ export default function InvoiceDetail() {
   if (!isAuthenticated || user?.role !== 'admin_coop') return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <MainLayout>
       <Head>
         <title>Detalle de Factura - Sistema ACA</title>
       </Head>
 
-      <div className="container-aca">
+      
         {/* Header */}
         <Header 
           title="Detalle de Factura"
@@ -132,22 +134,17 @@ export default function InvoiceDetail() {
           <div className="max-w-4xl mx-auto">
             {/* Alerts */}
             {error && (
-              <div className="alert-aca alert-error mb-6" role="alert">
-                {error}
-              </div>
+              <Alert type="error" message={error} className="mb-6" />
             )}
             
             {success && (
-              <div className="alert-aca alert-success mb-6" role="alert">
-                {success}
-              </div>
+              <Alert type="success" message={success} className="mb-6" />
             )}
 
             {loading ? (
-              <div className="card-aca text-center py-12">
-                <div className="spinner-aca mb-4"></div>
-                <p className="text-gray-600">Cargando datos de la factura...</p>
-              </div>
+              <LoadingSpinner 
+                message='Cargando datos de la factura...'
+              />
             ) : invoice ? (
               <div className="space-y-6">
                 {/* Status Banner */}
@@ -174,22 +171,22 @@ export default function InvoiceDetail() {
                 />
 
                 {/* Actions */}
-                {invoice.status === 'pendiente_validacion' && (
+                {invoice.status === 'enviada' && (
                   <div className="flex justify-end space-x-4">
-                    <button
+                    <Button
                       onClick={() => setShowRejectionDialog(true)}
                       disabled={submitting}
-                      className="btn-aca bg-red-600 hover:bg-red-700"
+                      className="bg-red-600 hover:bg-red-700"
                     >
                       ❌ Rechazar Factura
-                    </button>
-                    <button
+                    </Button>                   
+                    <Button
                       onClick={handleAccept}
                       disabled={submitting}
-                      className="btn-aca bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700"
                     >
                       ✅ Aceptar Factura
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -202,51 +199,55 @@ export default function InvoiceDetail() {
                 <p className="text-gray-600 mb-4">
                   La factura que busca no existe o no tiene permisos para verla.
                 </p>
-                <Link href="/cooperativa/facturas" className="btn-aca">
+                <Button
+                  onClick={() => router.push('/cooperativa/facturas')}
+                >
                   Volver a Facturas
-                </Link>
+                </Button>
               </div>
             )}
           </div>
         </main>
 
         {/* Rejection Dialog */}
-        {showRejectionDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-              <h3 className="text-lg font-semibold mb-4">Rechazar Factura</h3>
-              <p className="text-gray-600 mb-4">
-                Por favor, indique el motivo del rechazo:
-              </p>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                rows={4}
-                placeholder="Escriba el motivo del rechazo..."
-              />
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={() => {
-                    setShowRejectionDialog(false);
-                    setRejectionReason('');
-                  }}
-                  className="btn-aca bg-gray-600 hover:bg-gray-700"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleReject}
-                  disabled={!rejectionReason.trim() || submitting}
-                  className="btn-aca bg-red-600 hover:bg-red-700"
-                >
-                  Confirmar Rechazo
-                </button>
-              </div>
+        <Modal
+          isOpen={showRejectionDialog}
+          onClose={() => {
+            setShowRejectionDialog(false);
+            setRejectionReason('');
+          }}
+          title="Rechazar Factura"
+          subtitle="Por favor, indique el motivo del rechazo:"
+          maxWidth="lg"
+        >
+          <div className="space-y-4">
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              rows={4}
+              placeholder="Escriba el motivo del rechazo..."
+            />
+            <div className="flex justify-end space-x-4">
+              <Button
+                onClick={() => {
+                  setShowRejectionDialog(false);
+                  setRejectionReason('');
+                }}
+                className="bg-gray-600 hover:bg-gray-700"
+              >
+                Cancelar
+              </Button>
+              <Button
+              onClick={handleReject}
+              disabled={!rejectionReason.trim() || submitting}
+              className="bg-red-600 hover:bg-red-700"
+              >
+                Confirmar Rechazo
+              </Button>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </Modal>
+    </MainLayout>
   );
 }

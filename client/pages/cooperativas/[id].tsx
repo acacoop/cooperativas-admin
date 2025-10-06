@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
 import api from '../../utils/api';
 import { Cooperative } from '@/types';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Header } from '@/components/layout/Header';
 
 type Tab = 'general' | 'contact' | 'management' | 'stats';
 
@@ -104,37 +106,19 @@ export default function CooperativeDetail() {
   ];
 
   return (
+    <MainLayout>
     <div className="min-h-screen bg-gray-50">
       <Head>
         <title>{cooperative.name} - Sistema ACA</title>
       </Head>
 
-      <div className="container-aca">
         {/* Header ACA */}
-        <div className="header-aca">
-          <Link href="/cooperativas" className="btn-back">
-            ← Volver a Cooperativas
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          
-          <h1>{cooperative.name}</h1>
-          <h2>Código #{cooperative.code} • {cooperative.car_name || `Región CAR ${cooperative.car}`}</h2>
-          
-          {/* Información del usuario */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+        <Header
+          title={cooperative.name}
+          subtitle={`Código #${cooperative.code} • ${cooperative.car_name || `Región CAR ${cooperative.car}`}`}
+          backUrl='/cooperativas'
+          backLabel='Volver a Cooperativas'
+        />
 
         {/* Contenido principal */}
         <main className="p-6">
@@ -442,6 +426,6 @@ export default function CooperativeDetail() {
           )}
         </main>
       </div>
-    </div>
+    </MainLayout>
   );
 }

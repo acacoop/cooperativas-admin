@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import { InvoiceFormData, InvoiceFormItem } from '@/types/forms';
 import { Header } from '@/components/layout/Header';
 import MainLayout from '@/components/layout/MainLayout';
-import { FilterSelector, InformationCard } from '@/components/ui';
+import { Button, FilterSelector, InformationCard } from '@/components/ui';
 import { DataEntryCard } from '@/components/ui/DataEntryCard';
 import { DataEntryField } from '@/components/ui/DataEntryField';
 
@@ -25,6 +25,8 @@ export default function NewInvoice() {
   const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
   const [file, setFile] = useState<File | null>(null);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
+  const [fileKey, setFileKey] = useState<number>(0); // For forcing file input reset
+  const [additionalFileKey, setAdditionalFileKey] = useState<number>(0); // For forcing additional files reset
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingPowerAutomate, setLoadingPowerAutomate] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -140,10 +142,16 @@ export default function NewInvoice() {
       setFile(selectedFile);
       setError('');
     }
+    if (!e.target.files) {
+      setFile(null);
+    }
   };
 
   const handleAdditionalFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (!e.target.files) {
+      setFile(null);
+      return;
+    }
 
     for (const file of e.target.files) {
       if (file.type !== 'application/pdf' && file.type !== 'image/png' && file.type !== 'image/jpeg') {
@@ -157,6 +165,16 @@ export default function NewInvoice() {
       setAdditionalFiles(prev => [...prev, file]);
       setError('');
     }
+  };
+
+  const deleteInvoiceFile = () => {
+    setFile(null);
+    setFileKey(prev => prev + 1); // Force file input reset
+  };
+
+  const deleteAllAdditionalFiles = () => {
+    setAdditionalFiles([]);
+    setAdditionalFileKey(prev => prev + 1); // Force additional files input reset
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -343,7 +361,16 @@ export default function NewInvoice() {
                 title="📄 Archivo PDF de la Factura"
                 className="card-aca"
               >
+                {
+                  file && (
+                    <Button onClick={deleteInvoiceFile} className="mb-4 bg-red-600 hover:bg-red-700">
+                      🗑️ Eliminar Archivo de Factura
+                    </Button>
+                  )
+                }
+
                 <DataEntryField
+                  key={`invoice-file-${fileKey}`}
                   label="Subir Factura (PDF) *"
                   fieldType='file'
                   id="invoice_file"
@@ -359,26 +386,37 @@ export default function NewInvoice() {
                   </p>
                 )}
               </DataEntryCard>
-
-              <div className="card-aca">
-                <h3 className="mb-4">📎 Documentos adicionales de la Factura</h3>
-                <div className="form-group-aca">
-                  <label htmlFor="additional_documents">Subir Documentos Adicionales *</label>
-                  <input
-                    id="additional_documents"
-                    type="file"
-                    multiple
-                    accept=".pdf, .png, .jpg"
-                    onChange={handleAdditionalFilesChange}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  {additionalFiles.length > 0 && (
+              
+              <DataEntryCard
+                title="📎 Documentos adicionales de la Factura"
+                className="card-aca"
+              >
+                {
+                  additionalFiles.length > 0 && (
+                    <Button onClick={deleteAllAdditionalFiles} className="mb-4 bg-red-600 hover:bg-red-700">
+                      🗑️ Eliminar Todos los Archivos
+                    </Button>
+                  )
+                }
+                
+                <DataEntryField
+                  key={`additional-files-${additionalFileKey}`}
+                  label="Subir Documentos Adicionales"
+                  fieldType='file'
+                  id="additional_documents"
+                  name="additional_documents"
+                  multiple
+                  accept=".pdf, .png, .jpg"
+                  onChange={handleAdditionalFilesChange}
+                  className='form-group-aca'
+                />
+                {additionalFiles.length > 0 && (
                     <p className="text-sm text-green-600 mt-2">
                       ✅ Archivos seleccionados: {additionalFiles.map(f => f.name).join(', ')}
                     </p>
                   )}
-                </div>
-              </div>
+              </DataEntryCard>
+              
 
               {/* Botones */}
               <div className="flex justify-between items-center">

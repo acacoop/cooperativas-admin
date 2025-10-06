@@ -11,10 +11,10 @@ import FilterCard, { FilterOption } from '@/components/ui/FilterCard';
 import ScrollView from '@/components/ui/ScrollView';
 import { InvoiceCard } from '@/components/invoices/InvoiceCard';
 import { InvoiceTable } from '@/components/invoices/InvoiceTable';
-import { Alert, LoadingSpinner } from '@/components/ui';
+import { Alert, Button, LoadingSpinner, Modal, CardViewToggle } from '@/components/ui';
+import type { ViewMode } from '@/components/ui';
 
 type FilterStatus = InvoiceStatus | 'todas';
-type ViewMode = 'cards' | 'table';
 
 interface StatusConfig {
   color: string;
@@ -28,6 +28,8 @@ export default function SupplierInvoices() {
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<FilterStatus>('todas');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -130,15 +132,6 @@ export default function SupplierInvoices() {
   // Actions component for supplier invoices
   const getInvoiceActions = (invoice: Invoice) => (
     <div className="flex items-center space-x-3">
-      {invoice.status === 'pendiente_validacion' && invoice.id && (
-        <Link 
-          href={`/proveedor/facturas/${invoice.id}/validar`}
-          className="btn-aca text-sm"
-        >
-          ✏️ Validar y Enviar
-        </Link>
-      )}
-      
       {invoice.status === 'rechazada' && invoice.id && (
         <Link 
           href={`/proveedor/facturas/${invoice.id}/corregir`}
@@ -149,12 +142,12 @@ export default function SupplierInvoices() {
       )}
 
       {invoice.id && (
-        <button 
-          onClick={() => window.open(`/api/invoices/${invoice.id}/download`, '_blank')}
+        <Button
+          onClick={handleDownload.bind(null, invoice.id)}
           className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
         >
           📥 Descargar PDF
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -172,7 +165,8 @@ export default function SupplierInvoices() {
       document.body.removeChild(a);
     } catch (error) {
       console.error('Error downloading invoice:', error);
-      alert('Error al descargar la factura');
+      setErrorMessage('No se pudo descargar la factura. Por favor, inténtelo de nuevo más tarde.');
+      setShowErrorModal(true);
     }
   };
 
@@ -198,41 +192,24 @@ export default function SupplierInvoices() {
           {/* Barra de acciones superior */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex gap-3">
-              <Link href="/proveedor/nueva-factura" className="btn-aca">
+              <Button
+                onClick={() => router.push('/proveedor/nueva-factura')}
+              >
                 ➕ Subir Nueva Factura
-              </Link>
-              
-              <Link 
-                href="/proveedor/metricas" 
-                className="btn-aca bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+              </Button>
+              <Button
+                onClick={() => router.push('/proveedor/metricas')}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
               >
                 📊 Ver Métricas
-              </Link>
+              </Button>
             </div>
             
             {/* Toggle de vista */}
-            <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`px-4 py-2 rounded-md font-medium transition-all ${
-                  viewMode === 'cards'
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                🗂️ Tarjetas
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`px-4 py-2 rounded-md font-medium transition-all ${
-                  viewMode === 'table'
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                📊 Tabla
-              </button>
-            </div>
+            <CardViewToggle 
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
           </div>
 
           {/* Estadísticas rápidas - Ahora son botones de filtro */}
@@ -301,6 +278,24 @@ export default function SupplierInvoices() {
             </ScrollView>
           )}
         </main>
+
+        {/* Error Modal */}
+        <Modal
+          isOpen={showErrorModal}
+          title="Error de Descarga"
+          subtitle={errorMessage}
+          onClose={() => setShowErrorModal(false)}
+          maxWidth="md"
+        >
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => setShowErrorModal(false)}
+              className="bg-gray-600 hover:bg-gray-700"
+            >
+              Cerrar
+            </Button>
+          </div>
+        </Modal>
       </MainLayout>
   );
 }
