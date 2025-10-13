@@ -10,6 +10,7 @@ import { InvoiceTable } from '@/components/invoices/InvoiceTable';
 import { Header } from '@/components/layout/Header';
 import MainLayout from '@/components/layout/MainLayout';
 import { Alert, Button, FilterSelector, ScrollView } from '@/components/ui';
+import { exportService } from '@/services/export.service';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
 type ViewMode = 'cards' | 'table';
@@ -53,6 +54,37 @@ export default function CooperativeInvoices() {
       console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await exportService.exportInvoicesCSV(user?.cooperative_id!);
+      const url = window.URL.createObjectURL(new Blob([response], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'facturas.csv');
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      setError('Error al exportar facturas');
+      console.error('Error:', error);
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try{
+      const response = await exportService.exportInvoicesJSON(user?.cooperative_id!);
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(response, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "facturas.json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    } catch (error) {
+      setError('Error al exportar facturas');
+      console.error('Error:', error);
     }
   };
 
@@ -180,11 +212,18 @@ export default function CooperativeInvoices() {
                 </div>
                 
                 <Button
-                  onClick={() => window.open('/api/invoices/export/csv', '_blank')}
-                  className="bg-green-600 hover:bg-green-700 text-sm"
+                  onClick={handleExportCSV}
+                  className="bg-green-600 hover:bg-green-700 text-sm px-3 py-2"
                   rel="noopener noreferrer"
                 >
-                  📊 Exportar CSV
+                  📊 CSV
+                </Button>
+                <Button
+                  onClick={handleExportJSON}
+                  className="bg-green-600 hover:bg-green-700 text-sm px-3 py-2"
+                  rel="noopener noreferrer"
+                >
+                  📊 JSON
                 </Button>
               </div>
             </div>
