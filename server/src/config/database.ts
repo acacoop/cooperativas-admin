@@ -131,6 +131,18 @@ class Database {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
     )`);
+
+    await this.run(`CREATE TABLE IF NOT EXISTS invoice_attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      invoice_id INTEGER NOT NULL,
+      file_path TEXT NOT NULL,
+      original_filename TEXT NOT NULL,
+      file_size INTEGER,
+      mime_type TEXT,
+      description TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+    )`);
   }
 }
 

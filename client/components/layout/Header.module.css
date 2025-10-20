@@ -1,0 +1,146 @@
+.header-aca {
+  --aca-blue: #4a5568;
+  --aca-orange: #6b7280;
+  --aca-blue-dark: #2d3748;
+  --white: #ffffff;
+  width: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--aca-blue) 0%,
+    var(--aca-blue-dark) 100%
+  );
+  color: var(--white);
+  position: relative;
+  padding: 3rem 2rem 1.5rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.header-aca::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="20" cy="90" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+  background-size: 100px 100px;
+  opacity: 0.3;
+}
+
+.back-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: var(--white);
+  font-size: 0.875rem;
+  z-index: 10;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: opacity 0.2s;
+}
+
+.back-button:hover {
+  opacity: 0.8;
+}
+
+.user-info {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.aca-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aca-logo {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  padding: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.aca-tagline {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--aca-orange);
+}
+
+.title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+@media (min-width: 640px) {
+  .header-aca {
+    padding: 3.5rem 2rem 2rem;
+  }
+
+  .aca-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .aca-tagline {
+    font-size: 0.875rem;
+  }
+
+  .header-title {
+    font-size: 2rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-aca {
+    padding: 4rem 3rem 2.5rem;
+  }
+
+  .header-title {
+    font-size: 2.25rem;
+  }
+}

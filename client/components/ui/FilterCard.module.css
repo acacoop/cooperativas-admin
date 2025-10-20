@@ -1,0 +1,136 @@
+/* FilterCard Component Styles */
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .filterGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filterButton {
+  /* Base card styling */
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterButtonInactive:hover {
+  background-color: rgb(249, 250, 251);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.filterButtonActive {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.filterValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.filterLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(55, 65, 81);
+  margin-bottom: 0.25rem;
+}
+
+.filterIndicator {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Color variants for active state */
+.filterButton--blue.filterButtonActive {
+  border: 2px solid rgb(59, 130, 246);
+  background-color: rgb(239, 246, 255);
+}
+
+.filterButton--blue .filterValue {
+  color: rgb(37, 99, 235);
+}
+
+.filterButton--blue .filterIndicator {
+  color: rgb(37, 99, 235);
+}
+
+.filterButton--yellow.filterButtonActive {
+  border: 2px solid rgb(234, 179, 8);
+  background-color: rgb(254, 252, 232);
+}
+
+.filterButton--yellow .filterValue {
+  color: rgb(161, 98, 7);
+}
+
+.filterButton--yellow .filterIndicator {
+  color: rgb(161, 98, 7);
+}
+
+.filterButton--green.filterButtonActive {
+  border: 2px solid rgb(34, 197, 94);
+  background-color: rgb(240, 253, 244);
+}
+
+.filterButton--green .filterValue {
+  color: rgb(22, 163, 74);
+}
+
+.filterButton--green .filterIndicator {
+  color: rgb(22, 163, 74);
+}
+
+.filterButton--red.filterButtonActive {
+  border: 2px solid rgb(239, 68, 68);
+  background-color: rgb(254, 242, 242);
+}
+
+.filterButton--red .filterValue {
+  color: rgb(220, 38, 38);
+}
+
+.filterButton--red .filterIndicator {
+  color: rgb(220, 38, 38);
+}
+
+.filterButton--purple.filterButtonActive {
+  border: 2px solid rgb(147, 51, 234);
+  background-color: rgb(250, 245, 255);
+}
+
+.filterButton--purple .filterValue {
+  color: rgb(147, 51, 234);
+}
+
+.filterButton--purple .filterIndicator {
+  color: rgb(147, 51, 234);
+}
+
+.filterButton--orange.filterButtonActive {
+  border: 2px solid rgb(234, 88, 12);
+  background-color: rgb(255, 247, 237);
+}
+
+.filterButton--orange .filterValue {
+  color: rgb(234, 88, 12);
+}
+
+.filterButton--orange .filterIndicator {
+  color: rgb(234, 88, 12);
+}

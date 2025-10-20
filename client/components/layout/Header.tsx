@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { useAuth } from '@/utils/AuthContext';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
+import styles from './Header.module.css';
 
 interface HeaderProps {
   title: string;
@@ -19,25 +21,18 @@ export function Header({ title, subtitle, backUrl, backLabel }: HeaderProps) {
   };
 
   return (
-    <div className="header-aca">
+    <div className={styles['header-aca']}>
+      {/* Back button */}
       {backUrl && (
-        <Link href={backUrl} className="btn-back">
+        <Link href={backUrl} className={styles['back-button']}>
           ← {backLabel || 'Volver'}
         </Link>
       )}
       
-      <div className="aca-brand">
-        <div className="aca-logo">ACA</div>
-        <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-      </div>
-      
-      <h1>{title}</h1>
-      {subtitle && <h2>{subtitle}</h2>}
-      
       {/* User info */}
       {user && (
-        <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-          <span className="text-sm">{user.username}</span>
+        <div className={styles['user-info']}>
+          <span className="text-sm hidden sm:inline">{user.username}</span>
           <button
             onClick={handleLogout}
             className="text-sm text-orange-200 hover:text-white transition-colors"
@@ -46,6 +41,34 @@ export function Header({ title, subtitle, backUrl, backLabel }: HeaderProps) {
           </button>
         </div>
       )}
+
+      {/* Centered content */}
+      <div className={styles['header-content']}>
+        <div className={styles['aca-brand']}>
+          <div className={styles['aca-logo']}>
+            <Image 
+              src="/logos/gpi-logo.png" 
+              alt="ACA Logo" 
+              width={80} 
+              height={80} 
+              className="object-cover w-full h-full" 
+              priority 
+            />
+          </div>
+        </div>
+        
+        <div className={styles['title-container']}>
+          <h1 className={styles['header-title']}>{title}</h1>
+          {user?.company_name && (
+            <h2 className={styles['header-subtitle']}>
+              Cooperativa: {user.company_name}
+            </h2>
+          )}
+          {subtitle && (
+            <h2 className={styles['header-subtitle']}>{subtitle}</h2>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,167 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 100%;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+}
+
+.chartContent {
+  min-height: 200px;
+}
+
+/* Bar Chart Styles */
+.barChart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.barItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.barLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.barWrapper {
+  background: #f3f4f6;
+  border-radius: 8px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 12px;
+  transition: width 0.6s ease;
+  min-width: 60px;
+}
+
+.barValue {
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Pie Chart Styles */
+.pieChart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.pieContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.pieSegment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pieColor {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.pieLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 12px;
+}
+
+.pieName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.pieValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Line Chart Styles */
+.lineChart {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lineItem {
+  display: grid;
+  grid-template-columns: 100px 1fr 60px;
+  gap: 12px;
+  align-items: center;
+}
+
+.lineLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.lineWrapper {
+  background: #f3f4f6;
+  border-radius: 4px;
+  height: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.line {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.lineValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+  }
+
+  .lineItem {
+    grid-template-columns: 80px 1fr 50px;
+    gap: 8px;
+  }
+
+  .barValue {
+    font-size: 0.75rem;
+  }
+}

@@ -35,6 +35,16 @@ export interface InvoiceItem {
   created_at?: string;
 }
 
+export interface InvoiceAttachment {
+  id?: number;
+  invoice_id: number;
+  original_filename: string;
+  file_size?: number;
+  mime_type?: string;
+  description?: string;
+  created_at?: string;
+}
+
 export type InvoiceStatus = 'pendiente_validacion' | 'enviada' | 'aceptada' | 'rechazada' | 'corregida';
 
 export interface Invoice {
@@ -58,6 +68,7 @@ export interface Invoice {
   sent_at?: string;
   responded_at?: string;
   items?: InvoiceItem[];
+  attachments?: InvoiceAttachment[];
   cooperative_name?: string;
   supplier_name?: string;
   supplier_contact?: string;
@@ -82,6 +93,10 @@ export interface Cooperative {
   secretary: string;
   treasurer: string;
   status: 'active' | 'inactive';
+  invoice_system_active?: number;
+  activated_at?: string;
+  activated_by?: number;
+  admin_user_id?: number;
   province?: string;
   city?: string;
   postal_code?: string;
@@ -89,6 +104,53 @@ export interface Cooperative {
   license_number?: string;
   created_at: string;
   updated_at: string;
+}
+
+// Cooperative Management Types
+export type CooperativeUserRole = 'admin' | 'aprobador' | 'visualizador';
+
+export interface CooperativeUser {
+  id: number;
+  user_id: number;
+  cooperative_id: number;
+  role: CooperativeUserRole;
+  created_by?: number;
+  created_at: string;
+  updated_at: string;
+  // Join fields
+  username?: string;
+  email?: string;
+  full_name?: string;
+}
+
+export interface CooperativeSupplier {
+  id: number;
+  cooperative_id: number;
+  supplier_id: number;
+  status: 'activo' | 'inactivo' | 'suspendido';
+  contact_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  notes?: string;
+  created_by?: number;
+  created_at: string;
+  updated_at: string;
+  // Join fields
+  company_name?: string;
+  cuit?: string;
+  email?: string;
+}
+
+export interface UserInvitation {
+  id: number;
+  cooperative_id: number;
+  email: string;
+  role: CooperativeUserRole;
+  invited_by: number;
+  status: 'pendiente' | 'aceptada' | 'rechazada' | 'expirada';
+  expires_at: string;
+  created_at: string;
+  accepted_at?: string;
 }
 
 // API Response Types

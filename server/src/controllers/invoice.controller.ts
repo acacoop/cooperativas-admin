@@ -4,6 +4,7 @@ import db from '../config/database';
 import { Invoice, InvoiceItem } from '../types';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 
 export class InvoiceController {
   public async upload(req: AuthRequest & { file?: Express.Multer.File }, res: Response): Promise<void> {
@@ -235,15 +236,169 @@ export class InvoiceController {
         [id]
       );
 
-      // Return invoice with items
+      // Get invoice attachments
+      const attachments = await db.all<any>(
+        'SELECT id, invoice_id, original_filename, file_size, mime_type, description, created_at FROM invoice_attachments WHERE invoice_id = ?',
+        [id]
+      );
+
+      // Return invoice with items and attachments
       res.json({
         ...invoice,
-        items
+        items,
+        attachments
       });
 
     } catch (error) {
       console.error('Get invoice error:', error);
       res.status(500).json({ error: 'Error al obtener factura' });
+    }
+  }
+
+  public async uploadAttachments(req: AuthRequest & { files?: Express.Multer.File[] }, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { descriptions } = req.body;
+
+      if (req.user?.role !== 'proveedor') {
+        res.status(403).json({ error: 'Solo proveedores pueden subir adjuntos' });
+        return;
+      }
+
+      const invoice = await db.get<Invoice>(
+        'SELECT * FROM invoices WHERE id = ? AND supplier_id = ?',
+        [id, req.user.id]
+      );
+
+      if (!invoice) {
+        res.status(404).json({ error: 'Factura no encontrada' });
+        return;
+      }
+
+      if (!req.files || req.files.length === 0) {
+        res.status(400).json({ error: 'No se recibieron archivos' });
+        return;
+      }
+
+      const descriptionsArray = descriptions ? JSON.parse(descriptions) : [];
+      const attachmentIds: number[] = [];
+
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const description = descriptionsArray[i] || '';
+
+        const result = await db.run(`
+          INSERT INTO invoice_attachments (
+            invoice_id, file_path, original_filename, file_size, mime_type, description
+          ) VALUES (?, ?, ?, ?, ?, ?)
+        `, [
+          id,
+          file.path,
+          file.originalname,
+          file.size,
+          file.mimetype,
+          description
+        ]);
+
+        attachmentIds.push(result.lastID);
+      }
+
+      res.json({
+        message: 'Adjuntos subidos exitosamente',
+        attachment_ids: attachmentIds,
+        count: req.files.length
+      });
+
+    } catch (error) {
+      console.error('Upload attachments error:', error);
+      res.status(500).json({ error: 'Error al subir adjuntos' });
+    }
+  }
+
+  public async downloadAttachment(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id, attachmentId } = req.params;
+
+      const invoice = await db.get<Invoice>('SELECT * FROM invoices WHERE id = ?', [id]);
+
+      if (!invoice) {
+        res.status(404).json({ error: 'Factura no encontrada' });
+        return;
+      }
+
+      const hasPermission = 
+        (req.user?.role === 'proveedor' && invoice.supplier_id === req.user.id) ||
+        (req.user?.role === 'admin_coop' && invoice.cooperative_id === req.user.cooperative_id) ||
+        req.user?.role === 'admin_aca';
+
+      if (!hasPermission) {
+        res.status(403).json({ error: 'Sin permisos para descargar este archivo' });
+        return;
+      }
+
+      const attachment = await db.get<any>(
+        'SELECT * FROM invoice_attachments WHERE id = ? AND invoice_id = ?',
+        [attachmentId, id]
+      );
+
+      if (!attachment) {
+        res.status(404).json({ error: 'Adjunto no encontrado' });
+        return;
+      }
+
+      if (!fs.existsSync(attachment.file_path)) {
+        res.status(404).json({ error: 'Archivo no encontrado en el servidor' });
+        return;
+      }
+
+      res.download(attachment.file_path, attachment.original_filename);
+    } catch (error) {
+      console.error('Download attachment error:', error);
+      res.status(500).json({ error: 'Error al descargar adjunto' });
+    }
+  }
+
+  public async deleteAttachment(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id, attachmentId } = req.params;
+
+      if (req.user?.role !== 'proveedor') {
+        res.status(403).json({ error: 'Solo proveedores pueden eliminar adjuntos' });
+        return;
+      }
+
+      const invoice = await db.get<Invoice>(
+        'SELECT * FROM invoices WHERE id = ? AND supplier_id = ?',
+        [id, req.user.id]
+      );
+
+      if (!invoice) {
+        res.status(404).json({ error: 'Factura no encontrada' });
+        return;
+      }
+
+      const attachment = await db.get<any>(
+        'SELECT * FROM invoice_attachments WHERE id = ? AND invoice_id = ?',
+        [attachmentId, id]
+      );
+
+      if (!attachment) {
+        res.status(404).json({ error: 'Adjunto no encontrado' });
+        return;
+      }
+
+      // Delete file from filesystem
+      if (fs.existsSync(attachment.file_path)) {
+        fs.unlinkSync(attachment.file_path);
+      }
+
+      // Delete from database
+      await db.run('DELETE FROM invoice_attachments WHERE id = ?', [attachmentId]);
+
+      res.json({ message: 'Adjunto eliminado exitosamente' });
+    } catch (error) {
+      console.error('Delete attachment error:', error);
+      res.status(500).json({ error: 'Error al eliminar adjunto' });
     }
   }
 
@@ -332,6 +487,69 @@ export class InvoiceController {
     } catch (error) {
       console.error('Download invoice error:', error);
       res.status(500).json({ error: 'Error al descargar factura' });
+    }
+  }
+
+  public async sendToPowerAutomate(req: AuthRequest & { file?: Express.Multer.File }, res: Response): Promise<void> {
+    try {
+      if (req.user?.role !== 'proveedor') {
+        res.status(403).json({ error: 'Solo proveedores pueden enviar facturas' });
+        return;
+      }
+
+      if (!req.file) {
+        res.status(400).json({ error: 'Archivo requerido' });
+        return;
+      }
+
+      // Convertir archivo a base64
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const fileBase64 = fileBuffer.toString('base64');
+      
+      // Preparar datos para Power Automate
+      const powerAutomateData = {
+        filename: req.file.originalname,
+        content: fileBase64
+      };
+
+      // URL del endpoint de Power Automate
+      const powerAutomateUrl = 'https://defaulta7cad06884854149bb950f323bdfa8.9e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/249d4f021fe64a0ca536cc507aa2715a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pd9Gcfkg34yDr8Bmhd7z038JqLRtH5akRhvirdnwRUY';
+
+      console.log('Enviando factura a Power Automate:', req.file.originalname);
+      
+      // Enviar a Power Automate
+      const response = await axios.post(powerAutomateUrl, powerAutomateData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 segundos de timeout
+      });
+
+      console.log('Respuesta de Power Automate:', response.data);
+
+      // Limpiar archivo temporal
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.json({
+        message: 'Factura enviada exitosamente a Power Automate',
+        powerAutomateResponse: response.data,
+        status: response.status
+      });
+
+    } catch (error: any) {
+      console.error('Error enviando a Power Automate:', error);
+      
+      // Limpiar archivo temporal en caso de error
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.status(500).json({ 
+        error: 'Error al enviar factura a Power Automate',
+        details: error.response?.data || error.message
+      });
     }
   }
 }

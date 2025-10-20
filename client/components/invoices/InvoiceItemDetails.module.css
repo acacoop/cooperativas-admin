@@ -1,0 +1,42 @@
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headerRow {
+  border-bottom: 1px solid var(--border-gray-200);
+}
+
+.headerCell {
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-gray-600);
+}
+
+.headerCell[align="right"] {
+  text-align: right;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--border-gray-100);
+}
+
+.tableCell {
+  padding: 0.75rem;
+  color: var(--text-gray-900);
+}
+
+.tableCell[align="right"] {
+  text-align: right;
+}
+
+.totalCell {
+  composes: tableCell;
+  font-weight: 600;
+}

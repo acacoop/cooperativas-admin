@@ -1,0 +1,247 @@
+/* Stats Card Styles */
+.statCard {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.statIcon {
+  font-size: 1.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.statDescription {
+  font-size: 0.75rem;
+}
+
+/* Split layout styles */
+.statCard--split {
+  text-align: left;
+  padding: 1.5rem;
+}
+
+.splitContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.splitLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.splitLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.splitValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.splitIcon {
+  font-size: 2.5rem;
+}
+
+/* Color variants */
+.statCard--blue {
+  background-color: rgb(239, 246, 255);
+  border-color: rgb(191, 219, 254);
+}
+
+.statCard--blue .statValue {
+  color: rgb(37, 99, 235);
+}
+
+.statCard--blue .statLabel {
+  color: rgb(30, 64, 175);
+}
+
+.statCard--blue .statDescription {
+  color: rgb(37, 99, 235);
+}
+
+.statCard--blue .splitLabel {
+  color: rgb(37, 99, 235);
+}
+
+.statCard--blue .splitValue {
+  color: rgb(30, 58, 138);
+}
+
+.statCard--green {
+  background-color: rgb(240, 253, 244);
+  border-color: rgb(187, 247, 208);
+}
+
+.statCard--green .statValue {
+  color: rgb(22, 163, 74);
+}
+
+.statCard--green .statLabel {
+  color: rgb(21, 128, 61);
+}
+
+.statCard--green .statDescription {
+  color: rgb(22, 163, 74);
+}
+
+.statCard--green .splitLabel {
+  color: rgb(22, 163, 74);
+}
+
+.statCard--green .splitValue {
+  color: rgb(20, 83, 45);
+}
+
+.statCard--gray {
+  background-color: rgb(249, 250, 251);
+  border-color: rgb(209, 213, 219);
+}
+
+.statCard--gray .statValue {
+  color: rgb(55, 65, 81);
+}
+
+.statCard--gray .statLabel {
+  color: rgb(75, 85, 99);
+}
+
+.statCard--gray .statDescription {
+  color: rgb(55, 65, 81);
+}
+
+.statCard--gray .splitLabel {
+  color: rgb(75, 85, 99);
+}
+
+.statCard--gray .splitValue {
+  color: rgb(17, 24, 39);
+}
+
+.statCard--orange {
+  background-color: rgb(255, 247, 237);
+  border-color: rgb(254, 215, 170);
+}
+
+.statCard--orange .statValue {
+  color: rgb(234, 88, 12);
+}
+
+.statCard--orange .statLabel {
+  color: rgb(194, 65, 12);
+}
+
+.statCard--orange .statDescription {
+  color: rgb(234, 88, 12);
+}
+
+.statCard--orange .splitLabel {
+  color: rgb(234, 88, 12);
+}
+
+.statCard--orange .splitValue {
+  color: rgb(154, 52, 18);
+}
+
+.statCard--purple {
+  background-color: rgb(250, 245, 255);
+  border-color: rgb(221, 214, 254);
+}
+
+.statCard--purple .statValue {
+  color: rgb(147, 51, 234);
+}
+
+.statCard--purple .statLabel {
+  color: rgb(124, 58, 237);
+}
+
+.statCard--purple .statDescription {
+  color: rgb(147, 51, 234);
+}
+
+.statCard--purple .splitLabel {
+  color: rgb(147, 51, 234);
+}
+
+.statCard--purple .splitValue {
+  color: rgb(107, 33, 168);
+}
+
+.statCard--red {
+  background-color: rgb(254, 242, 242);
+  border-color: rgb(254, 202, 202);
+}
+
+.statCard--red .statValue {
+  color: rgb(220, 38, 38);
+}
+
+.statCard--red .statLabel {
+  color: rgb(185, 28, 28);
+}
+
+.statCard--red .statDescription {
+  color: rgb(220, 38, 38);
+}
+
+.statCard--red .splitLabel {
+  color: rgb(220, 38, 38);
+}
+
+.statCard--red .splitValue {
+  color: rgb(153, 27, 27);
+}
+
+.statCard--yellow {
+  background-color: rgb(254, 252, 232);
+  border-color: rgb(254, 240, 138);
+}
+
+.statCard--yellow .statValue {
+  color: rgb(161, 98, 7);
+}
+
+.statCard--yellow .statLabel {
+  color: rgb(133, 77, 14);
+}
+
+.statCard--yellow .statDescription {
+  color: rgb(161, 98, 7);
+}
+
+.statCard--yellow .splitLabel {
+  color: rgb(161, 98, 7);
+}
+
+.statCard--yellow .splitValue {
+  color: rgb(120, 53, 15);
+}

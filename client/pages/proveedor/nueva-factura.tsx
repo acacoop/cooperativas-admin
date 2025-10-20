@@ -1,10 +1,14 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../../utils/AuthContext';
 import api from '../../utils/api';
 import { InvoiceFormData, InvoiceFormItem } from '@/types/forms';
+import { Header } from '@/components/layout/Header';
+import MainLayout from '@/components/layout/MainLayout';
+import { Button, FilterSelector, InformationCard } from '@/components/ui';
+import { DataEntryCard } from '@/components/ui/DataEntryCard';
+import { DataEntryField } from '@/components/ui/DataEntryField';
 
 const initialFormData: InvoiceFormData = {
   invoice_number: '',
@@ -20,9 +24,14 @@ const initialFormData: InvoiceFormData = {
 export default function NewInvoice() {
   const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
   const [file, setFile] = useState<File | null>(null);
+  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
+  const [fileKey, setFileKey] = useState<number>(0); // For forcing file input reset
+  const [additionalFileKey, setAdditionalFileKey] = useState<number>(0); // For forcing additional files reset
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingPowerAutomate, setLoadingPowerAutomate] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [powerAutomateResponse, setPowerAutomateResponse] = useState<any>(null);
   
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -65,6 +74,14 @@ export default function NewInvoice() {
         total_amount: total.toFixed(2)
       }));
     }
+  };
+
+  // Handler for DataEntryField components
+  const handleFieldChange = (fieldName: string) => (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
   };
 
   const handleItemChange = (index: number, field: keyof InvoiceFormItem, value: string) => {
@@ -125,6 +142,39 @@ export default function NewInvoice() {
       setFile(selectedFile);
       setError('');
     }
+    if (!e.target.files) {
+      setFile(null);
+    }
+  };
+
+  const handleAdditionalFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) {
+      setFile(null);
+      return;
+    }
+
+    for (const file of e.target.files) {
+      if (file.type !== 'application/pdf' && file.type !== 'image/png' && file.type !== 'image/jpeg') {
+        setError('Solo se permiten archivos PDF, PNG y JPEG');
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) { // 25MB
+        setError('El archivo no puede ser mayor a 25MB');
+        return;
+      }
+      setAdditionalFiles(prev => [...prev, file]);
+      setError('');
+    }
+  };
+
+  const deleteInvoiceFile = () => {
+    setFile(null);
+    setFileKey(prev => prev + 1); // Force file input reset
+  };
+
+  const deleteAllAdditionalFiles = () => {
+    setAdditionalFiles([]);
+    setAdditionalFileKey(prev => prev + 1); // Force additional files input reset
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -167,6 +217,37 @@ export default function NewInvoice() {
     }
   };
 
+  const handleSendToPowerAutomate = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoadingPowerAutomate(true);
+    setError('');
+    setSuccess('');
+    setPowerAutomateResponse(null);
+
+    if (!file) {
+      setError('Debe seleccionar un archivo PDF');
+      setLoadingPowerAutomate(false);
+      return;
+    }
+
+    try {
+      const submitData = new FormData();
+      submitData.append('invoice', file);
+
+      const response = await api.sendToPowerAutomate(submitData);
+      
+      setSuccess('Factura enviada exitosamente a Power Automate');
+      setPowerAutomateResponse(response);
+      console.log('Respuesta de Power Automate:', response);
+      
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'Error al enviar a Power Automate');
+      console.error('Error:', error);
+    } finally {
+      setLoadingPowerAutomate(false);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     router.push('/login');
@@ -175,36 +256,13 @@ export default function NewInvoice() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Head>
-        <title>Nueva Factura - Sistema ACA</title>
-      </Head>
-
-      <div className="container-aca">
-        {/* Header ACA */}
-        <div className="header-aca">
-          <Link href="/proveedor/facturas" className="btn-back">
-            ← Volver a Mis Facturas
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Subir Nueva Factura</h1>
-          <h2>Proveedor: {user.company_name || user.username}</h2>
-          
-          {/* Información del usuario */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+    <MainLayout title='Nueva Factura - Proveedores' description='Sube una nueva factura al sistema'>
+        <Header 
+          title="Subir Nueva Factura"
+          subtitle={`Proveedor: ${user.company_name || user.username}`}
+          backUrl="/proveedor/facturas"
+          backLabel="Volver a Mis Facturas"
+        />
 
         {/* Contenido principal */}
         <main className="p-6">
@@ -222,245 +280,189 @@ export default function NewInvoice() {
               </div>
             )}
 
+            {/* Respuesta de Power Automate */}
+            {powerAutomateResponse && (
+              <div className="card-aca mb-6 bg-green-50 border-green-200">
+                <h3 className="text-green-800 mb-3">🤖 Respuesta de Power Automate</h3>
+                <pre className="text-sm text-green-700 bg-green-100 p-3 rounded overflow-auto">
+                  {JSON.stringify(powerAutomateResponse, null, 2)}
+                </pre>
+              </div>
+            )}
+
             {/* Información importante */}
-            <div className="card-aca mb-6 bg-blue-50 border-blue-200">
-              <h3 className="text-blue-800 mb-3">ℹ️ Información importante</h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Solo se permiten archivos PDF de hasta 10MB</li>
-                <li>• La factura se asignará automáticamente a la cooperativa según el CUIT receptor</li>
-                <li>• Después de subir, deberá validar los datos antes de enviarla</li>
-                <li>• Una vez enviada, la cooperativa podrá aceptar o rechazar la factura</li>
-              </ul>
-            </div>
+            <InformationCard
+              title="ℹ️ Información importante"
+              items={[
+                'Solo se permiten archivos PDF de hasta 10MB',
+                <><strong>Power Automate:</strong> Botón morado para envío directo - solo requiere archivo PDF</>,
+                <><strong>Subir Factura:</strong> Proceso tradicional - requiere todos los datos del formulario</>,
+                'La factura se asignará automáticamente a la cooperativa según el CUIT receptor',
+                'Una vez enviada, la cooperativa podrá aceptar o rechazar la factura'
+              ]}
+              variant="info"
+              className="mb-6"
+            />
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Datos básicos */}
-              <div className="card-aca">
-                <h3 className="mb-4">📄 Datos de la Factura</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="form-group-aca">
-                    <label htmlFor="invoice_number">Número de Factura *</label>
-                    <input
-                      id="invoice_number"
-                      name="invoice_number"
-                      type="text"
-                      required
-                      placeholder="ej: 0001-00000123"
-                      value={formData.invoice_number}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="form-group-aca">
-                    <label htmlFor="issue_date">Fecha de Emisión *</label>
-                    <input
-                      id="issue_date"
-                      name="issue_date"
-                      type="date"
-                      required
-                      value={formData.issue_date}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="form-group-aca">
-                    <label htmlFor="issuer_cuit">CUIT Emisor (Su CUIT) *</label>
-                    <input
-                      id="issuer_cuit"
-                      name="issuer_cuit"
-                      type="text"
-                      required
-                      placeholder="20-12345678-9"
-                      value={formData.issuer_cuit}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="form-group-aca">
-                    <label htmlFor="receiver_cuit">CUIT Receptor (Cooperativa) *</label>
-                    <input
-                      id="receiver_cuit"
-                      name="receiver_cuit"
-                      type="text"
-                      required
-                      placeholder="30-12345678-9"
-                      value={formData.receiver_cuit}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Items */}
-              <div className="card-aca">
-                <div className="flex items-center justify-between mb-4">
-                  <h3>🛒 Items de la Factura</h3>
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className="btn-aca text-sm"
-                  >
-                    ➕ Agregar Item
-                  </button>
-                </div>
-                
-                <div className="space-y-4">
-                  {formData.items.map((item, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-700">Item #{index + 1}</h4>
-                        {formData.items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            🗑️ Eliminar
-                          </button>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        <div className="md:col-span-2">
-                          <label className="text-sm font-medium text-gray-600">Descripción</label>
-                          <input
-                            type="text"
-                            placeholder="Descripción del producto/servicio"
-                            value={item.description}
-                            onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Cantidad</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0"
-                            value={item.quantity}
-                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Precio Unitario</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={item.unit_price}
-                            onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3 text-right">
-                        <span className="text-sm font-medium text-gray-600">Total: </span>
-                        <span className="font-semibold text-green-600">
-                          ${parseFloat(item.total_price || '0').toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Totales */}
-              <div className="card-aca">
-                <h3 className="mb-4">💰 Totales de la Factura</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="form-group-aca">
-                    <label htmlFor="subtotal">Subtotal</label>
-                    <input
-                      id="subtotal"
-                      name="subtotal"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.subtotal}
-                      onChange={handleInputChange}
-                      className="font-semibold"
-                    />
-                  </div>
-                  
-                  <div className="form-group-aca">
-                    <label htmlFor="iva_amount">IVA</label>
-                    <input
-                      id="iva_amount"
-                      name="iva_amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.iva_amount}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="form-group-aca">
-                    <label htmlFor="total_amount">Total Final</label>
-                    <input
-                      id="total_amount"
-                      name="total_amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.total_amount}
-                      onChange={handleInputChange}
-                      className="font-bold text-green-600 text-lg"
-                      readOnly
-                    />
-                  </div>
-                </div>
-              </div>
+              <DataEntryCard
+                title="📝 Datos de la Factura"
+                className="card-aca"
+                gridCols='2'
+              >
+                <DataEntryField
+                  label="Concepto de Factura *"
+                  fieldType='input'
+                  id="invoice_number"
+                  name="invoice_number"
+                  value={formData.invoice_number}
+                  onChange={handleFieldChange('invoice_number')}
+                  placeholder="Concepto de la factura"
+                  required
+                  className='form-group-aca'
+                />
+                <DataEntryField
+                  label="Centro o Sucursal *"
+                  fieldType='input'
+                  id="issue_date"
+                  name="issue_date"
+                  value={formData.issue_date}
+                  onChange={handleFieldChange('issue_date')}
+                  placeholder="Centro o Sucursal"
+                  required
+                  className='form-group-aca'
+                />
+                <DataEntryField
+                  label="Campo Opcional"
+                  fieldType='input'
+                  id="issuer_cuit"
+                  name="issuer_cuit"
+                  value={formData.issuer_cuit}
+                  onChange={handleFieldChange('issuer_cuit')}
+                  placeholder=""
+                  className='form-group-aca'
+                />
+                <DataEntryField
+                  label="Campo Opcional"
+                  fieldType='input'
+                  id="receiver_cuit"
+                  name="receiver_cuit"
+                  value={formData.receiver_cuit}
+                  onChange={handleFieldChange('receiver_cuit')}
+                  placeholder=""
+                  className='form-group-aca'
+                />
+              </DataEntryCard>
 
               {/* Archivo */}
-              <div className="card-aca">
-                <h3 className="mb-4">📎 Archivo PDF de la Factura</h3>
-                <div className="form-group-aca">
-                  <label htmlFor="invoice_file">Subir Factura (PDF) *</label>
-                  <input
-                    id="invoice_file"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  {file && (
+              <DataEntryCard
+                title="📄 Archivo PDF de la Factura"
+                className="card-aca"
+              >
+                {
+                  file && (
+                    <Button onClick={deleteInvoiceFile} className="mb-4 bg-red-600 hover:bg-red-700">
+                      🗑️ Eliminar Archivo de Factura
+                    </Button>
+                  )
+                }
+
+                <DataEntryField
+                  key={`invoice-file-${fileKey}`}
+                  label="Subir Factura (PDF) *"
+                  fieldType='file'
+                  id="invoice_file"
+                  name="invoice_file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  required
+                  className='form-group-aca'
+                />
+                {file && (
+                  <p className="text-sm text-green-600 mt-2">
+                    ✅ Archivo seleccionado: {file.name}
+                  </p>
+                )}
+              </DataEntryCard>
+              
+              <DataEntryCard
+                title="📎 Documentos adicionales de la Factura"
+                className="card-aca"
+              >
+                {
+                  additionalFiles.length > 0 && (
+                    <Button onClick={deleteAllAdditionalFiles} className="mb-4 bg-red-600 hover:bg-red-700">
+                      🗑️ Eliminar Todos los Archivos
+                    </Button>
+                  )
+                }
+                
+                <DataEntryField
+                  key={`additional-files-${additionalFileKey}`}
+                  label="Subir Documentos Adicionales"
+                  fieldType='file'
+                  id="additional_documents"
+                  name="additional_documents"
+                  multiple
+                  accept=".pdf, .png, .jpg"
+                  onChange={handleAdditionalFilesChange}
+                  className='form-group-aca'
+                />
+                {additionalFiles.length > 0 && (
                     <p className="text-sm text-green-600 mt-2">
-                      ✅ Archivo seleccionado: {file.name}
+                      ✅ Archivos seleccionados: {additionalFiles.map(f => f.name).join(', ')}
                     </p>
                   )}
-                </div>
-              </div>
+              </DataEntryCard>
+              
 
               {/* Botones */}
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <Link href="/proveedor/facturas" className="btn-aca bg-gray-600 hover:bg-gray-700">
                   ← Cancelar
                 </Link>
                 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-aca"
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="spinner-aca mr-2"></div>
-                      Subiendo...
-                    </div>
-                  ) : (
-                    '📤 Subir Factura'
-                  )}
-                </button>
+                <div className="flex gap-4">
+                  {/* Botón Power Automate (solo requiere archivo) */}
+                  <button
+                    type="button"
+                    onClick={handleSendToPowerAutomate}
+                    disabled={loadingPowerAutomate || !file}
+                    className="btn-aca bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                    title="Enviar directamente a Power Automate (solo requiere archivo PDF)"
+                  >
+                    {loadingPowerAutomate ? (
+                      <div className="flex items-center">
+                        <div className="spinner-aca mr-2"></div>
+                        Enviando a PA...
+                      </div>
+                    ) : (
+                      '🤖 Enviar a Power Automate'
+                    )}
+                  </button>
+
+                  {/* Botón subir tradicional */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-aca"
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <div className="spinner-aca mr-2"></div>
+                        Subiendo...
+                      </div>
+                    ) : (
+                      '📤 Subir Factura'
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
         </main>
-      </div>
-    </div>
+      </MainLayout>
   );
 }

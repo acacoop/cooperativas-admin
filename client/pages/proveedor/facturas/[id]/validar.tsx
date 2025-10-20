@@ -5,6 +5,14 @@ import Link from 'next/link';
 import { useAuth } from '../../../../utils/AuthContext';
 import api from '../../../../utils/api';
 import { Invoice, InvoiceItem } from '@/types';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Header } from '@/components/layout/Header';
+import { Alert } from '@/components/ui/Alert';
+import { InvoiceDetails } from '@/components/invoices/InvoiceDetails';
+import { InvoiceItemDetails } from '@/components/invoices/InvoiceItemDetails';
+import { InvoiceTotals } from '@/components/invoices/InvoiceTotals';
+import { Aviso } from '@/components/ui';
+import { InvoiceAttachments } from '@/components/invoices/InvoiceAttachments';
 
 interface InvoiceData extends Invoice {
   id: number;
@@ -108,51 +116,25 @@ export default function ValidateInvoice() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Head>
-        <title>Validar Factura - Sistema ACA</title>
-      </Head>
 
-      <div className="container-aca">
-        {/* Header ACA */}
-        <div className="header-aca">
-          <Link href="/proveedor/facturas" className="btn-back">
-            ← Volver a Mis Facturas
-          </Link>
-          
-          <div className="aca-brand">
-            <div className="aca-logo">ACA</div>
-            <div className="aca-tagline">Asociación de Cooperativas Argentinas</div>
-          </div>
-          <h1>Validar y Enviar Factura</h1>
-          <h2>Proveedor: {user.company_name || user.username}</h2>
-          
-          {/* Información del usuario */}
-          <div className="absolute top-4 right-4 flex items-center space-x-4 text-white">
-            <span className="text-sm">{user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-orange-200 hover:text-white transition-colors"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
+    <MainLayout title='Validar Factura - Sistema ACA' description='Valida y envía tu factura a la cooperativa'>
+        <Header 
+          backUrl='/proveedor/facturas' 
+          backLabel='Volver a Mis Facturas' 
+          title="Validar y Enviar Factura" 
+          subtitle={`Proveedor: ${user.company_name || user.username}`} 
+        />
 
         {/* Contenido principal */}
         <main className="p-6">
           <div className="max-w-4xl mx-auto">
             {/* Alertas */}
             {error && (
-              <div className="alert-aca alert-error mb-6">
-                {error}
-              </div>
+              <Alert type="error" message={error} className="mb-6" />
             )}
             
             {success && (
-              <div className="alert-aca alert-success mb-6">
-                {success}
-              </div>
+              <Alert type='success' message={success} className="mb-6" />
             )}
 
             {loading ? (
@@ -163,95 +145,29 @@ export default function ValidateInvoice() {
             ) : invoice ? (
               <div className="space-y-6">
                 {/* Información de la factura */}
-                <div className="card-aca">
-                  <h3 className="mb-4">📄 Datos de la Factura</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Número de Factura</label>
-                      <p className="font-semibold text-gray-900">{invoice.invoice_number}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">Fecha de Emisión</label>
-                      <p className="font-semibold text-gray-900">
-                        {new Date(invoice.issue_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">CUIT Emisor</label>
-                      <p className="font-semibold text-gray-900">{invoice.issuer_cuit}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">CUIT Receptor</label>
-                      <p className="font-semibold text-gray-900">{invoice.receiver_cuit}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="card-aca">
-                  <h3 className="mb-4">🛒 Items de la Factura</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left p-3 text-sm font-medium text-gray-600">Descripción</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Cantidad</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Precio Unit.</th>
-                          <th className="text-right p-3 text-sm font-medium text-gray-600">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items.map((item, index) => (
-                          <tr key={index} className="border-b border-gray-100">
-                            <td className="p-3 text-gray-900">{item.description}</td>
-                            <td className="p-3 text-right text-gray-900">{item.quantity}</td>
-                            <td className="p-3 text-right text-gray-900">
-                              ${item.unit_price.toLocaleString()}
-                            </td>
-                            <td className="p-3 text-right font-semibold text-gray-900">
-                              ${item.total_price.toLocaleString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Totales */}
-                <div className="card-aca">
-                  <h3 className="mb-4">💰 Resumen de Totales</h3>
-                  <div className="bg-gray-50 p-6 rounded-lg">
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Subtotal:</span>
-                        <span className="font-semibold">${invoice.subtotal.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">IVA:</span>
-                        <span className="font-semibold">${invoice.iva_amount.toLocaleString()}</span>
-                      </div>
-                      <hr className="border-gray-300" />
-                      <div className="flex justify-between text-lg">
-                        <span className="font-semibold text-gray-900">Total:</span>
-                        <span className="font-bold text-green-600">
-                          ${invoice.total_amount.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+                <InvoiceDetails invoice={invoice} />
+                
+                <InvoiceItemDetails items={items} />
+                
+                <InvoiceTotals invoice={invoice} />
+                
+                {/* Attachments - Proveedor puede subir y eliminar */}
+                <InvoiceAttachments 
+                  invoiceId={invoice.id} 
+                  attachments={invoice.attachments || []} 
+                  canUpload={true}
+                  onAttachmentsChange={loadInvoiceData}
+                />
+                
                 {/* Información importante */}
-                <div className="card-aca bg-yellow-50 border-yellow-200">
-                  <h3 className="text-yellow-800 mb-3">⚠️ Importante</h3>
+                <Aviso title='⚠️ Importante' type='warning' className='border-yellow-200 text-yellow-700'>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• Revise cuidadosamente todos los datos antes de enviar</li>
                     <li>• Una vez enviada, la factura estará disponible para la cooperativa</li>
                     <li>• La cooperativa podrá aceptar o rechazar la factura</li>
                     <li>• Si es rechazada, podrá corregirla y reenviarla</li>
                   </ul>
-                </div>
+                </Aviso>
 
                 {/* Botones de acción */}
                 <div className="flex justify-between">
@@ -291,7 +207,6 @@ export default function ValidateInvoice() {
             )}
           </div>
         </main>
-      </div>
-    </div>
+      </MainLayout>
   );
 }

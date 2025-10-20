@@ -1,0 +1,61 @@
+/* CooperativeActions Component Styles */
+.actionsContainer {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 100px;
+}
+
+.detailsButton {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 150ms ease-in-out;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.detailsButton:hover {
+  color: #1d4ed8;
+  background-color: #dbeafe;
+}
+
+.deactivateButton {
+  background: none;
+  border: none;
+  color: #ea580c;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 150ms ease-in-out;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.deactivateButton:hover {
+  color: #c2410c;
+  background-color: #fed7aa;
+}
+
+.activateButton {
+  background: none;
+  border: none;
+  color: #16a34a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 150ms ease-in-out;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+.activateButton:hover {
+  color: #15803d;
+  background-color: #dcfce7;
+}

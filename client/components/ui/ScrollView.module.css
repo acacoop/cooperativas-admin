@@ -1,0 +1,83 @@
+.scrollContainer {
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  position: relative;
+}
+
+.content {
+  padding-right: 0.25rem; /* Small padding to prevent content cutoff */
+}
+
+/* Custom scrollbar styling */
+.showScrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.showScrollbar::-webkit-scrollbar-track {
+  background: rgb(243, 244, 246);
+  border-radius: 4px;
+}
+
+.showScrollbar::-webkit-scrollbar-thumb {
+  background: rgb(156, 163, 175);
+  border-radius: 4px;
+  transition: background-color 150ms ease;
+}
+
+.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(107, 114, 128);
+}
+
+/* Hide scrollbar completely */
+.hideScrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hideScrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Fade effect at bottom to indicate more content */
+.scrollContainer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.8));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.scrollContainer:not(.atBottom)::after {
+  opacity: 1;
+}
+
+/* Smooth scrolling */
+.scrollContainer {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+.scrollContainer:focus {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
+/* Responsive height adjustments */
+@media (max-width: 768px) {
+  .scrollContainer {
+    max-height: 400px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .scrollContainer {
+    max-height: 300px !important;
+  }
+}
