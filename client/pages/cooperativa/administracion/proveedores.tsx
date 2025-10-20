@@ -5,6 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { CooperativeSupplier } from '@/types';
 import styles from './proveedores.module.css';
+import { Button, InformationCard, GenericTable, TableColumn, TableAction, LoadingSpinner, FormModal, FormField } from '@/components/ui';
 
 export default function GestionProveedores() {
   const [proveedores, setProveedores] = useState<CooperativeSupplier[]>([]);
@@ -41,7 +42,40 @@ export default function GestionProveedores() {
       // TODO: Implementar llamada a la API
       // const data = await api.getCooperativeSuppliers();
       // setProveedores(data);
-      setProveedores([]);
+      
+      const exampleProveedores: CooperativeSupplier[] = [
+        {
+          id: 1,
+          cooperative_id: 1,
+          supplier_id: 101,
+          company_name: 'Distribuidora San Martín S.A.',
+          cuit: '30-12345678-9',
+          email: 'contacto@distribuidorasanmartin.com.ar',
+          contact_name: 'María González',
+          contact_phone: '+54 11 4567-8901',
+          status: 'activo',
+          notes: 'Proveedor de productos alimenticios y bebidas',
+          created_at: '2024-01-15T10:30:00Z',
+          updated_at: '2024-10-15T14:20:00Z'
+        },
+        {
+          id: 2,
+          cooperative_id: 1,
+          supplier_id: 102,
+          company_name: 'Tecnología Rural S.R.L.',
+          cuit: '30-98765432-1',
+          email: 'ventas@tecnologiarural.com',
+          contact_name: 'Carlos Rodríguez',
+          contact_phone: '+54 351 234-5678',
+          status: 'inactivo',
+          notes: 'Especialista en maquinaria agrícola y repuestos',
+          created_at: '2024-03-20T09:15:00Z',
+          updated_at: '2024-09-10T16:45:00Z'
+        }
+      ];
+      
+      setProveedores(exampleProveedores);
+      // setProveedores([]);
     } catch (error) {
       console.error('Error loading suppliers:', error);
     } finally {
@@ -79,6 +113,126 @@ export default function GestionProveedores() {
     return <span className={`px-3 py-1 rounded-full text-sm font-semibold ${c.bg} ${c.text}`}>{c.label}</span>;
   };
 
+  const columns: TableColumn<CooperativeSupplier>[] = [
+    {
+      key: 'company_name',
+      title: 'Empresa',
+      render: (value, record) => (
+        <div>
+          <div className="font-medium text-gray-900">{record.company_name}</div>
+          <div className="text-sm text-gray-500">{record.email}</div>
+        </div>
+      )
+    },
+    {
+      key: 'cuit',
+      title: 'CUIT',
+      render: (value) => (
+        <span className="text-gray-600 font-mono text-sm">{value}</span>
+      )
+    },
+    {
+      key: 'contact_name',
+      title: 'Contacto',
+      render: (value, record) => (
+        <div>
+          <div className="text-sm text-gray-900">{record.contact_name}</div>
+          <div className="text-sm text-gray-500">{record.contact_phone}</div>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      title: 'Estado',
+      render: (value) => getStatusBadge(value)
+    }
+  ];
+
+  const actions: TableAction<CooperativeSupplier>[] = [
+    {
+      label: 'Editar',
+      variant: 'primary',
+      onClick: (record) => {
+        console.log('Edit supplier:', record);
+        // TODO: Implement edit functionality
+      }
+    },
+    {
+      label: 'Suspender',
+      variant: 'warning',
+      onClick: (record) => {
+        console.log('Suspend supplier:', record);
+        // TODO: Implement suspend functionality
+      }
+    },
+    {
+      label: 'Eliminar',
+      variant: 'danger',
+      onClick: (record) => {
+        console.log('Delete supplier:', record);
+        // TODO: Implement delete functionality
+      }
+    }
+  ];
+
+  // Define form fields for the modal
+  const formFields: FormField[] = [
+    {
+      name: 'company_name',
+      label: 'Nombre de la Empresa',
+      type: 'text',
+      placeholder: 'Proveedores S.A.',
+      required: true,
+      colSpan: 2
+    },
+    {
+      name: 'cuit',
+      label: 'CUIT',
+      type: 'text',
+      placeholder: '20-12345678-9',
+      required: true
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'email',
+      placeholder: 'contacto@proveedor.com',
+      required: true
+    },
+    {
+      name: 'contact_name',
+      label: 'Nombre de Contacto',
+      type: 'text',
+      placeholder: 'Juan Pérez'
+    },
+    {
+      name: 'contact_phone',
+      label: 'Teléfono de Contacto',
+      type: 'tel',
+      placeholder: '+54 11 1234-5678'
+    },
+    {
+      name: 'notes',
+      label: 'Notas',
+      type: 'textarea',
+      placeholder: 'Información adicional sobre el proveedor...',
+      rows: 3,
+      colSpan: 2
+    }
+  ];
+
+  // Handler for form data changes
+  const handleFormDataChange = (data: Record<string, any>) => {
+    setFormData({
+      company_name: data.company_name || '',
+      cuit: data.cuit || '',
+      email: data.email || '',
+      contact_name: data.contact_name || '',
+      contact_phone: data.contact_phone || '',
+      notes: data.notes || ''
+    });
+  };
+
   if (!isAuthenticated || user?.role !== 'admin_coop') return null;
 
   return (
@@ -101,193 +255,70 @@ export default function GestionProveedores() {
               <h2 className="text-xl font-bold text-gray-800">Proveedores Autorizados</h2>
               <p className="text-sm text-gray-600">Solo estos proveedores podrán enviarte facturas</p>
             </div>
-            <button
+            <Button
               onClick={() => setShowModal(true)}
-              className="btn-aca bg-gradient-to-r from-green-600 to-green-700"
+              className='btn-aca bg-gradient-to-r from-green-600 to-green-700'
             >
               ➕ Autorizar Proveedor
-            </button>
+            </Button>  
           </div>
 
           {/* Información importante */}
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h3 className="font-semibold text-yellow-900 mb-2">⚠️ Seguridad:</h3>
-            <ul className="text-sm text-yellow-800 space-y-1">
-              <li>• Verifica siempre el CUIT del proveedor antes de autorizarlo</li>
-              <li>• Un proveedor puede estar autorizado por múltiples cooperativas</li>
-              <li>• Puedes suspender temporalmente un proveedor sin eliminarlo</li>
-              <li>• Solo los proveedores activos podrán cargar facturas</li>
-            </ul>
-          </div>
-
+          <InformationCard 
+            title="⚠️ Seguridad"
+            variant="warning"
+            items={[
+              'Verifica siempre el CUIT del proveedor antes de autorizarlo',
+              'Un proveedor puede estar autorizado por múltiples cooperativas',
+              'Puedes suspender temporalmente un proveedor sin eliminarlo',
+              'Solo los proveedores activos podrán cargar facturas'
+            ]}
+          />
           {/* Lista de proveedores */}
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="spinner-aca"></div>
-            </div>
-          ) : proveedores.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <div className="text-6xl mb-4">🏢</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No hay proveedores autorizados
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Comienza autorizando proveedores para que puedan enviarte facturas
-              </p>
-              <button
-                onClick={() => setShowModal(true)}
-                className="btn-aca"
-              >
-                ➕ Autorizar Primer Proveedor
-              </button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CUIT</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contacto</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {proveedores.map((proveedor) => (
-                    <tr key={proveedor.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{proveedor.company_name}</div>
-                        <div className="text-sm text-gray-500">{proveedor.email}</div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-600 font-mono text-sm">{proveedor.cuit}</td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{proveedor.contact_name}</div>
-                        <div className="text-sm text-gray-500">{proveedor.contact_phone}</div>
-                      </td>
-                      <td className="px-6 py-4">{getStatusBadge(proveedor.status)}</td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">Editar</button>
-                        <button className="text-orange-600 hover:text-orange-800 text-sm">Suspender</button>
-                        <button className="text-red-600 hover:text-red-800 text-sm">Eliminar</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <GenericTable
+            columns={columns}
+            data={proveedores}
+            loading={loading}
+            actions={actions}
+            emptyState={{
+              icon: '🏢',
+              title: 'No hay proveedores autorizados',
+              description: 'Comienza autorizando proveedores para que puedan enviarte facturas',
+              action: {
+                label: '➕ Autorizar Primer Proveedor',
+                onClick: () => setShowModal(true)
+              }
+            }}
+          />
         </div>
       </main>
 
       {/* Modal de agregar proveedor */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">Autorizar Nuevo Proveedor</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre de la Empresa *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.company_name}
-                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="Proveedores S.A."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CUIT *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.cuit}
-                    onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="20-12345678-9"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="contacto@proveedor.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre de Contacto
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.contact_name}
-                    onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="Juan Pérez"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teléfono de Contacto
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.contact_phone}
-                    onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="+54 11 1234-5678"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notas
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    rows={3}
-                    placeholder="Información adicional sobre el proveedor..."
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 btn-aca"
-                >
-                  Autorizar Proveedor
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FormModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Autorizar Nuevo Proveedor"
+        subtitle="Completa los datos del proveedor para autorizarlo"
+        fields={formFields}
+        formData={formData}
+        onFormDataChange={handleFormDataChange}
+        onSubmit={handleSubmit}
+        actions={[
+          {
+            label: 'Cancelar',
+            variant: 'secondary',
+            type: 'button',
+            onClick: () => setShowModal(false)
+          },
+          {
+            label: 'Autorizar Proveedor',
+            variant: 'primary',
+            type: 'submit'
+          }
+        ]}
+        maxWidth="2xl"
+        gridCols={2}
+      />
     </MainLayout>
   );
 }

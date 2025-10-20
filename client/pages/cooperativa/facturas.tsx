@@ -9,7 +9,7 @@ import { InvoiceCard } from '@/components/invoices/InvoiceCard';
 import { InvoiceTable } from '@/components/invoices/InvoiceTable';
 import { Header } from '@/components/layout/Header';
 import MainLayout from '@/components/layout/MainLayout';
-import { Alert, Button, FilterSelector, ScrollView } from '@/components/ui';
+import { Alert, Button, CardViewToggle, FilterCard, FilterSelector, ScrollView } from '@/components/ui';
 import { exportService } from '@/services/export.service';
 
 type FilterStatus = InvoiceStatus | 'todas' | 'corregida';
@@ -188,28 +188,11 @@ export default function CooperativeInvoices() {
                 </Button>
                 
                 {/* Toggle de vista */}
-                <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
-                  <button
-                    onClick={() => setViewMode('cards')}
-                    className={`px-4 py-2 rounded-md font-medium transition-all text-sm ${
-                      viewMode === 'cards'
-                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    🗂️ Tarjetas
-                  </button>
-                  <button
-                    onClick={() => setViewMode('table')}
-                    className={`px-4 py-2 rounded-md font-medium transition-all text-sm ${
-                      viewMode === 'table'
-                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    📊 Tabla
-                  </button>
-                </div>
+                <CardViewToggle
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1"
+                />
                 
                 <Button
                   onClick={handleExportCSV}
@@ -229,68 +212,46 @@ export default function CooperativeInvoices() {
             </div>
 
             {/* Quick stats - Now filter buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <button
-                onClick={() => setFilter('todas')}
-                className={`card-aca text-center transition-all cursor-pointer ${
-                  filter === 'todas' ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="text-2xl font-bold text-blue-600 mb-2">
-                  {invoices.length}
-                </div>
-                <div className="text-sm font-medium text-gray-700">Total Facturas</div>
-                <div className="text-xs text-blue-600 mt-1">
-                  {filter === 'todas' ? '← Filtro activo' : 'Clic para ver todas'}
-                </div>
-              </button>
-                
-              <button
-                onClick={() => setFilter('enviada')}
-                className={`card-aca text-center transition-all cursor-pointer ${
-                  filter === 'enviada' ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="text-2xl font-bold text-orange-600 mb-2">
-                  {invoices.filter(inv => inv.status === 'enviada' || inv.status === 'corregida').length}
-                </div>
-                <div className="text-sm font-medium text-gray-700">Pendientes</div>
-                <div className="text-xs text-orange-600 mt-1">
-                  {filter === 'enviada' ? '← Filtro activo' : 'Clic para filtrar'}
-                </div>
-              </button>
-                
-              <button
-                onClick={() => setFilter('aceptada')}
-                className={`card-aca text-center transition-all cursor-pointer ${
-                  filter === 'aceptada' ? 'ring-2 ring-green-500 bg-green-50' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="text-2xl font-bold text-green-600 mb-2">
-                  {invoices.filter(inv => inv.status === 'aceptada').length}
-                </div>
-                <div className="text-sm font-medium text-gray-700">Aceptadas</div>
-                <div className="text-xs text-green-600 mt-1">
-                  {filter === 'aceptada' ? '← Filtro activo' : 'Clic para filtrar'}
-                </div>
-              </button>
-                
-              <button
-                onClick={() => setFilter('rechazada')}
-                className={`card-aca text-center transition-all cursor-pointer ${
-                  filter === 'rechazada' ? 'ring-2 ring-red-500 bg-red-50' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="text-2xl font-bold text-red-600 mb-2">
-                  {invoices.filter(inv => inv.status === 'rechazada').length}
-                </div>
-                <div className="text-sm font-medium text-gray-700">Rechazadas</div>
-                <div className="text-xs text-red-600 mt-1">
-                  {filter === 'rechazada' ? '← Filtro activo' : 'Clic para filtrar'}
-                </div>
-              </button>
-            </div>
-
+            
+            <FilterCard
+              options={[
+                {
+                  id: 'todas',
+                  label: 'Total Facturas',
+                  value: invoices.length,
+                  color: 'blue',
+                  activeText: '← Filtro activo',
+                  inactiveText: 'Clic para ver todas'
+                },
+                {
+                  id: 'enviada',
+                  label: 'Pendientes',
+                  value: invoices.filter(inv => inv.status === 'enviada' || inv.status === 'corregida').length,
+                  color: 'orange',
+                  activeText: '← Filtro activo',
+                  inactiveText: 'Clic para filtrar'
+                },
+                {
+                  id: 'aceptada',
+                  label: 'Aceptadas',
+                  value: invoices.filter(inv => inv.status === 'aceptada').length,
+                  color: 'green',
+                  activeText: '← Filtro activo',
+                  inactiveText: 'Clic para filtrar'
+                },
+                {
+                  id: 'rechazada',
+                  label: 'Rechazadas',
+                  value: invoices.filter(inv => inv.status === 'rechazada').length,
+                  color: 'red',
+                  activeText: '← Filtro activo',
+                  inactiveText: 'Clic para filtrar'
+                }
+              ]}
+              activeFilter={filter}
+              onFilterChange={(filterId: string) => setFilter(filterId as FilterStatus)}
+            />
+            
             {/* Alerts */}
             {error && (
               <Alert 

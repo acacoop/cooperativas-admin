@@ -8,9 +8,10 @@ interface MenuCardProps {
   title: string;
   subtitle: string;
   footerText: string;
-  gradientFrom: string;
-  gradientTo: string;
-  hoverColor: string;
+  gradientFrom?: string;
+  gradientTo?: string;
+  hoverColor?: string;
+  className?: string;
 }
 
 const MenuCard: FC<MenuCardProps> = ({ 
@@ -21,10 +22,11 @@ const MenuCard: FC<MenuCardProps> = ({
   footerText,
   gradientFrom,
   gradientTo,
-  hoverColor
+  hoverColor,
+  className
 }) => {
   const cardContent = (
-    <div className={`card-aca ${href ? 'group cursor-pointer' : ''}`}>
+    <div className={className ? className : `card-aca ${href ? 'group cursor-pointer' : ''}`}>
       <div className={styles.container}>
         <div 
           className={styles.iconContainer} 

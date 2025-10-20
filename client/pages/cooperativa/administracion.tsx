@@ -5,6 +5,9 @@ import { useAuth } from '../../utils/AuthContext';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import styles from './administracion.module.css';
+import MenuCard from '@/components/ui/MenuCard';
+import { InformationCard, StatsCard } from '@/components/ui';
+import { Stats } from 'fs';
 
 type AdminTab = 'overview' | 'usuarios' | 'proveedores' | 'configuracion';
 
@@ -54,84 +57,79 @@ export default function Administracion() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Link href="/cooperativa/administracion/usuarios" className={styles.menuCard}>
-                  <div className={styles.menuIcon}>👥</div>
-                  <h3 className={styles.menuTitle}>Gestión de Usuarios</h3>
-                  <p className={styles.menuDescription}>
-                    Administra los usuarios de tu cooperativa y sus roles
-                  </p>
-                  <div className={styles.menuAction}>
-                    Ver usuarios →
-                  </div>
-                </Link>
+                <MenuCard 
+                  icon='👥'
+                  title='Gestión de Usuarios'
+                  subtitle='Administra los usuarios de tu cooperativa y sus roles'
+                  footerText='Ver usuarios →'
+                  href='/cooperativa/administracion/usuarios'
+                  className={styles.menuCard}
+                />
 
-                <Link href="/cooperativa/administracion/proveedores" className={styles.menuCard}>
-                  <div className={styles.menuIcon}>🏢</div>
-                  <h3 className={styles.menuTitle}>Gestión de Proveedores</h3>
-                  <p className={styles.menuDescription}>
-                    Autoriza y gestiona tus proveedores de confianza
-                  </p>
-                  <div className={styles.menuAction}>
-                    Ver proveedores →
-                  </div>
-                </Link>
+                <MenuCard 
+                  icon='🏢'
+                  title='Gestión de Proveedores'
+                  subtitle='Autoriza y gestiona tus proveedores de confianza'
+                  footerText='Ver proveedores →'
+                  href='/cooperativa/administracion/proveedores'
+                  className={styles.menuCard}
+                />
 
-                <Link href="/cooperativa/administracion/configuracion" className={styles.menuCard}>
-                  <div className={styles.menuIcon}>⚙️</div>
-                  <h3 className={styles.menuTitle}>Configuración</h3>
-                  <p className={styles.menuDescription}>
-                    Ajusta los parámetros de tu cooperativa
-                  </p>
-                  <div className={styles.menuAction}>
-                    Configurar →
-                  </div>
-                </Link>
+                <MenuCard 
+                  icon='⚙️'
+                  title='Configuración'
+                  subtitle='Ajusta los parámetros de tu cooperativa'
+                  footerText='Configurar →'
+                  href='/cooperativa/administracion/configuracion'
+                  className={styles.menuCard}
+                />
               </div>
 
               {/* Estadísticas rápidas */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-blue-600 font-semibold">USUARIOS ACTIVOS</p>
-                      <p className="text-3xl font-bold text-blue-900 mt-2">0</p>
-                    </div>
-                    <div className="text-4xl">👥</div>
-                  </div>
-                </div>
+                <StatsCard 
+                  stat={{
+                    id: 'active_users',
+                    value: 0,
+                    label: 'USUARIOS ACTIVOS',
+                    color: 'blue',
+                    icon: '👥'
+                  }}
+                  layout="split"
+                />
+                <StatsCard 
+                  stat={{
+                    id: 'authorized_suppliers',
+                    value: 0,
+                    label: 'PROVEEDORES AUTORIZADOS',
+                    color: 'green',
+                    icon: '🏢'
+                  }}
+                  layout="split"
+                />
 
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-green-600 font-semibold">PROVEEDORES AUTORIZADOS</p>
-                      <p className="text-3xl font-bold text-green-900 mt-2">0</p>
-                    </div>
-                    <div className="text-4xl">🏢</div>
-                  </div>
-                </div>
-
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-purple-600 font-semibold">INVITACIONES PENDIENTES</p>
-                      <p className="text-3xl font-bold text-purple-900 mt-2">0</p>
-                    </div>
-                    <div className="text-4xl">📧</div>
-                  </div>
-                </div>
+                <StatsCard 
+                  stat={{
+                    id: 'pending_invitations',
+                    value: 0,
+                    label: 'INVITACIONES PENDIENTES',
+                    color: 'purple',
+                    icon: '📧'
+                  }}
+                  layout="split"
+                />
               </div>
 
               {/* Información importante */}
-              <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-                  ℹ️ Información Importante
-                </h3>
-                <ul className="text-sm text-yellow-800 space-y-2">
-                  <li>• <strong>Usuarios:</strong> Puedes crear usuarios con 3 roles: Administrador, Aprobador de Facturas y Visualizador</li>
-                  <li>• <strong>Proveedores:</strong> Solo los proveedores autorizados podrán enviarte facturas</li>
-                  <li>• <strong>Seguridad:</strong> Verifica siempre los datos de tus proveedores antes de autorizarlos</li>
-                </ul>
-              </div>
+              <InformationCard 
+                items={[
+                  <><strong>Usuarios:</strong> Puedes crear usuarios con 3 roles: Administrador, Aprobador de Facturas y Visualizador</>,
+                  <><strong>Proveedores:</strong> Solo los proveedores autorizados podrán enviarte facturas</>, 
+                  <><strong>Seguridad:</strong> Verifica siempre los datos de tus proveedores antes de autorizarlos</>
+                ]}
+                variant='warning'
+                className="mt-8"
+              />
             </>
           )}
         </div>

@@ -7,6 +7,7 @@ import { MetricsCard } from '@/components/dashboard/MetricsCard';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import api from '../../utils/api';
 import { Invoice } from '@/types';
+import { LoadingSpinner } from '@/components/ui';
 
 export default function CooperativaMetrics() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -107,7 +108,7 @@ export default function CooperativaMetrics() {
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <div className="spinner-aca"></div>
+              <LoadingSpinner />
             </div>
           ) : (
             <>
