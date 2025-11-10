@@ -1,0 +1,195 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  email         String    @unique
+  password      String
+  role          String    // Changed from enum to string for SQLite
+  cooperativeId Int?      @map("cooperative_id")
+  fullName      String?   @map("full_name")
+  companyName   String?   @map("company_name")
+  cuit          String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  cooperative           Cooperative?    @relation(fields: [cooperativeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  supplierInvoices      Invoice[]       @relation("SupplierInvoices")
+  statusUpdatedInvoices Invoice[]       @relation("StatusUpdatedBy")
+  pendingChanges        PendingChange[] @relation("UserChanges")
+  reviewedChanges       PendingChange[] @relation("ReviewedBy")
+  activatedCooperatives Cooperative[]   @relation("ActivatedBy")
+  adminOfCooperatives   Cooperative[]   @relation("AdminUser")
+  
+  @@map("users")
+}
+
+model Cooperative {
+  id               Int       @id @default(autoincrement())
+  code             Int       @unique
+  cuit             String    @unique
+  name             String
+  votes            Int?
+  substitutes      Int?
+  car              Int?
+  carName          String?   @map("car_name")
+  verificationCode String?   @map("verification_code")
+  address          String?
+  phone            String?
+  email            String?
+  president        String?
+  secretary        String?
+  treasurer        String?
+  status           String    @default("active")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  invoiceSystemActive Boolean? @default(false)
+  activatedAt      DateTime?
+  activatedBy      Int?
+  adminUserId      Int?
+  
+  // Relations
+  users            User[]
+  invoices         Invoice[]
+  pendingChanges   PendingChange[]
+  costCenters      CostCenter[]
+  invoiceCategories InvoiceCategory[]
+  activatedByUser  User? @relation("ActivatedBy", fields: [activatedBy], references: [id])
+  adminUser        User? @relation("AdminUser", fields: [adminUserId], references: [id])
+
+  @@map("cooperatives")
+}
+
+model PendingChange {
+  id            Int       @id @default(autoincrement())
+  cooperativeId Int       @map("cooperative_id")
+  userId        Int       @map("user_id")
+  changes       String    // JSON string
+  status        String    @default("pending") // Changed from enum to string
+  createdAt     DateTime  @default(now()) @map("created_at")
+  reviewedBy    Int?      @map("reviewed_by")
+  reviewedAt    DateTime? @map("reviewed_at")
+  
+  // Relations with explicit cascade handling
+  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User        @relation("UserChanges", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reviewer    User?       @relation("ReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  
+  @@map("pending_changes")
+}
+
+model Invoice {
+  id               Int       @id @default(autoincrement())
+  invoiceNumber    String    @map("invoice_number")
+  issueDate        DateTime  @map("issue_date")
+  issuerCuit       String    @map("issuer_cuit")
+  receiverCuit     String    @map("receiver_cuit")
+  cooperativeId    Int?      @map("cooperative_id")
+  supplierId       Int?      @map("supplier_id")
+  subtotal         Float?    // Changed from Decimal to Float for SQLite
+  ivaAmount        Float?    @map("iva_amount")
+  totalAmount      Float     @map("total_amount")
+  status           String    @default("pendiente_validacion")
+  filePath         String?   @map("file_path")
+  originalFilename String?   @map("original_filename")
+  rejectionReason  String?   @map("rejection_reason")
+  
+  // New tracking fields
+  statusUpdatedBy  Int?      @map("status_updated_by")
+  costCenter       String?   @map("cost_center")
+  category         String?   @map("category")
+  
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  validatedAt      DateTime? @map("validated_at")
+  sentAt           DateTime? @map("sent_at")
+  respondedAt      DateTime? @map("responded_at")
+  
+  // Relations with explicit cascade handling
+  cooperative     Cooperative?       @relation(fields: [cooperativeId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  supplier        User?              @relation("SupplierInvoices", fields: [supplierId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  statusUpdater   User?              @relation("StatusUpdatedBy", fields: [statusUpdatedBy], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  items           InvoiceItem[]
+  attachments     InvoiceAttachment[]
+  
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int      @map("invoice_id")
+  description String
+  quantity    Float    // Changed from Decimal to Float for SQLite
+  unitPrice   Float    @map("unit_price")
+  totalPrice  Float    @map("total_price")
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  @@map("invoice_items")
+}
+
+model InvoiceAttachment {
+  id               Int      @id @default(autoincrement())
+  invoiceId        Int      @map("invoice_id")
+  filePath         String   @map("file_path")
+  originalFilename String   @map("original_filename")
+  fileSize         Int?     @map("file_size")
+  mimeType         String?  @map("mime_type")
+  description      String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  @@map("invoice_attachments")
+}
+
+model CostCenter {
+  id            Int         @id @default(autoincrement())
+  cooperativeId Int         @map("cooperative_id")
+  name          String
+  description   String?
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  
+  @@unique([cooperativeId, name]) // Prevent duplicate names within same cooperative
+  @@map("cost_centers")
+}
+
+model InvoiceCategory {
+  id            Int         @id @default(autoincrement())
+  cooperativeId Int         @map("cooperative_id")
+  name          String
+  description   String?
+  color         String?     // For UI color coding
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  
+  @@unique([cooperativeId, name]) // Prevent duplicate names within same cooperative
+  @@map("invoice_categories")
+}
+
+// SQLite doesn't support enums, so we use string constants
+// Valid UserRole values: "admin_aca", "operador_aca", "admin_coop", "proveedor"
+// Valid ChangeStatus values: "pending", "approved", "rejected"

@@ -7,7 +7,8 @@ import authRoutes from './routes/auth.routes';
 import cooperativeRoutes from './routes/cooperative.routes';
 import invoiceRoutes from './routes/invoice.routes';
 import adminRoutes from './routes/admin.routes';
-import db from './config/database';
+import cooperativeDataRoutes from './routes/cooperative-data.routes';
+import { setupSwagger } from './config/swagger';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,14 +20,15 @@ app.use(express.json());
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Initialize database
-db.initTables().catch(console.error);
+// Setup Swagger documentation
+setupSwagger(app);
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cooperatives', cooperativeRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/data', cooperativeDataRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

@@ -1,146 +1,169 @@
 import { Request, Response } from 'express';
-import db from '../config/database';
 import bcrypt from 'bcryptjs';
-import { Cooperative, User } from '../types';
+import { PrismaClient } from '../generated/prisma';
+import { UserRepository } from '../models/repositories/UserRepository';
+import { CooperativeRepository } from '../models/repositories/CooperativeRepository';
+import { UserRole } from '../types';
 
-export const activateCooperative = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { username, email, full_name, password } = req.body;
-    const adminUserId = (req as any).user.id;
+export class AdminController {
+  private userRepository: UserRepository;
+  private cooperativeRepository: CooperativeRepository;
 
-    // Validaciones
-    if (!username || !email || !full_name || !password) {
-      return res.status(400).json({ error: 'Todos los campos son requeridos' });
-    }
+  constructor() {
+    const prisma = new PrismaClient();
+    this.userRepository = new UserRepository(prisma);
+    this.cooperativeRepository = new CooperativeRepository(prisma);
+  }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
-    }
+  public activateCooperative = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { username, email, full_name, password } = req.body;
+      const adminUserId = (req as any).user.id;
 
-    // Verificar que la cooperativa existe
-    const cooperative = await db.get<Cooperative>(
-      'SELECT * FROM cooperatives WHERE id = ?',
-      [id]
-    );
-
-    if (!cooperative) {
-      return res.status(404).json({ error: 'Cooperativa no encontrada' });
-    }
-
-    // Verificar si ya está activa
-    if (cooperative.invoice_system_active === 1) {
-      return res.status(400).json({ error: 'La cooperativa ya está activa' });
-    }
-
-    // Verificar que el username no esté en uso
-    const existingUser = await db.get<User>(
-      'SELECT id FROM users WHERE username = ?',
-      [username]
-    );
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
-    }
-
-    // Verificar que el email no esté en uso
-    const existingEmail = await db.get<User>(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
-
-    if (existingEmail) {
-      return res.status(400).json({ error: 'El email ya está en uso' });
-    }
-
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Crear el usuario administrador
-    const userResult = await db.run(
-      `INSERT INTO users (username, email, password, role, cooperative_id, full_name)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [username, email, hashedPassword, 'admin_coop', id, full_name]
-    );
-
-    const newUserId = userResult.lastID;
-
-    // Activar la cooperativa
-    await db.run(
-      `UPDATE cooperatives 
-       SET invoice_system_active = 1,
-           activated_at = datetime('now'),
-           activated_by = ?,
-           admin_user_id = ?
-       WHERE id = ?`,
-      [adminUserId, newUserId, id]
-    );
-
-    res.json({
-      success: true,
-      message: 'Cooperativa activada exitosamente',
-      data: {
-        cooperative_id: id,
-        admin_user_id: newUserId,
-        username,
-        email
+      // Validaciones
+      if (!username || !email || !full_name || !password) {
+        res.status(400).json({ error: 'Todos los campos son requeridos' });
+        return;
       }
-    });
 
-  } catch (error: any) {
-    console.error('Error activating cooperative:', error);
-    res.status(500).json({ error: 'Error al activar cooperativa' });
-  }
-};
+      if (password.length < 6) {
+        res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+        return;
+      }
 
-export const deactivateCooperative = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const adminUserId = (req as any).user.id;
+      const cooperativeId = parseInt(id);
+      if (isNaN(cooperativeId)) {
+        res.status(400).json({ error: 'ID de cooperativa inválido' });
+        return;
+      }
 
-    // Verificar que la cooperativa existe
-    const cooperative = await db.get<Cooperative>(
-      'SELECT * FROM cooperatives WHERE id = ?',
-      [id]
-    );
+      // Verificar que la cooperativa existe
+      const cooperative = await this.cooperativeRepository.findById(cooperativeId);
 
-    if (!cooperative) {
-      return res.status(404).json({ error: 'Cooperativa no encontrada' });
+      if (!cooperative) {
+        res.status(404).json({ error: 'Cooperativa no encontrada' });
+        return;
+      }
+
+      // Verificar si ya está activa
+      if (cooperative.invoiceSystemActive === true) {
+        res.status(400).json({ error: 'La cooperativa ya está activa' });
+        return;
+      }
+
+      // Verificar que el username no esté en uso
+      const existingUser = await this.userRepository.findByUsername(username);
+
+      if (existingUser) {
+        res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
+        return;
+      }
+
+      // Verificar que el email no esté en uso
+      const existingEmail = await this.userRepository.findByEmail(email);
+
+      if (existingEmail) {
+        res.status(400).json({ error: 'El email ya está en uso' });
+        return;
+      }
+
+      // Hash de la contraseña
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Crear el usuario administrador
+      const newUser = await this.userRepository.create({
+        username,
+        email,
+        password: hashedPassword,
+        role: 'admin_coop' as UserRole,
+        cooperative: {
+          connect: { id: cooperativeId }
+        },
+        fullName: full_name,
+        companyName: undefined,
+        cuit: undefined
+      });
+
+      // Activar la cooperativa with direct Prisma update to set relations
+      const prisma = new PrismaClient();
+      const updatedCooperative = await prisma.cooperative.update({
+        where: { id: cooperativeId },
+        data: {
+          invoiceSystemActive: true,
+          activatedAt: new Date(),
+          activatedBy: adminUserId,
+          adminUserId: newUser.id,
+          status: 'active'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Cooperativa activada exitosamente',
+        data: {
+          cooperative_id: cooperativeId,
+          admin_user_id: newUser.id,
+          username,
+          email
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Error activating cooperative:', error);
+      res.status(500).json({ error: 'Error al activar cooperativa' });
     }
+  };
 
-    // Desactivar la cooperativa
-    await db.run(
-      `UPDATE cooperatives 
-       SET invoice_system_active = 0
-       WHERE id = ?`,
-      [id]
-    );
+  public deactivateCooperative = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const adminUserId = (req as any).user.id;
 
-    res.json({
-      success: true,
-      message: 'Cooperativa desactivada exitosamente'
-    });
+      const cooperativeId = parseInt(id);
+      if (isNaN(cooperativeId)) {
+        res.status(400).json({ error: 'ID de cooperativa inválido' });
+        return;
+      }
 
-  } catch (error: any) {
-    console.error('Error deactivating cooperative:', error);
-    res.status(500).json({ error: 'Error al desactivar cooperativa' });
-  }
-};
+      // Verificar que la cooperativa existe
+      const cooperative = await this.cooperativeRepository.findById(cooperativeId);
 
-export const getCooperativeActivationStats = async (req: Request, res: Response) => {
-  try {
-    const stats = await db.get<any>(
-      `SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN invoice_system_active = 1 THEN 1 ELSE 0 END) as active,
-        SUM(CASE WHEN invoice_system_active = 0 OR invoice_system_active IS NULL THEN 1 ELSE 0 END) as inactive
-       FROM cooperatives`
-    );
+      if (!cooperative) {
+        res.status(404).json({ error: 'Cooperativa no encontrada' });
+        return;
+      }
 
-    res.json(stats);
+      // Desactivar la cooperativa
+      const prisma = new PrismaClient();
+      await prisma.cooperative.update({
+        where: { id: cooperativeId },
+        data: {
+          invoiceSystemActive: false,
+          status: 'inactive'
+        }
+      });
 
-  } catch (error: any) {
-    console.error('Error getting stats:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas' });
-  }
-};
+      res.json({
+        success: true,
+        message: 'Cooperativa desactivada exitosamente'
+      });
+
+    } catch (error: any) {
+      console.error('Error deactivating cooperative:', error);
+      res.status(500).json({ error: 'Error al desactivar cooperativa' });
+    }
+  };
+
+  public getCooperativeActivationStats = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Use the repository method for efficient stats calculation
+      const stats = await this.cooperativeRepository.getActivationStats();
+      res.json(stats);
+
+    } catch (error: any) {
+      console.error('Error getting stats:', error);
+      res.status(500).json({ error: 'Error al obtener estadísticas' });
+    }
+  };
+}

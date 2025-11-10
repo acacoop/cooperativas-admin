@@ -1,12 +1,24 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
-import db from '../config/database';
-import { Invoice, InvoiceItem } from '../types';
 import fs from 'fs';
-import path from 'path';
 import axios from 'axios';
+import { CooperativeRepository, InvoiceRepository } from '../models/repositories';
+import { PrismaClient } from '../generated/prisma';
+import { transformInvoiceForFrontend, transformInvoicesForFrontend } from '../utils/dataTransforms';
+
+const powerAutomateUrl = process.env.POWERAUTOMATE_URL || '';
 
 export class InvoiceController {
+
+  private invoiceRepository: InvoiceRepository;
+  private cooperativeRepository: CooperativeRepository;
+
+  constructor() {
+    const prisma = new PrismaClient();
+    this.invoiceRepository = new InvoiceRepository(prisma);
+    this.cooperativeRepository = new CooperativeRepository(prisma);
+  }
+
   public async upload(req: AuthRequest & { file?: Express.Multer.File }, res: Response): Promise<void> {
     try {
       if (req.user?.role !== 'proveedor') {
@@ -19,52 +31,58 @@ export class InvoiceController {
         return;
       }
 
-      const {
-        invoice_number,
-        issue_date,
-        issuer_cuit,
-        receiver_cuit,
-        subtotal,
-        iva_amount,
-        total_amount,
-        items
-      } = req.body;
+      // const {
+        // invoice_number,
+        // issue_date,
+        // issuer_cuit,
+        // receiver_cuit,
+        // subtotal,
+        // iva_amount,
+        // total_amount,
+        // items
+      // } = req.body;
+      
+      const invoiceData = req.body;
 
-      const coop = await db.get<{ id: number }>(
-        'SELECT id FROM cooperatives WHERE cuit = ?',
-        [receiver_cuit]
-      );
+      const coop = await this.cooperativeRepository.findByCuit(invoiceData.receiver_cuit);
+
+      // const coop = await db.get<{ id: number }>(
+        // 'SELECT id FROM cooperatives WHERE cuit = ?',
+        // [receiver_cuit]
+      // );
 
       if (!coop) {
         res.status(400).json({ error: 'CUIT receptor no encontrado en cooperativas registradas' });
         return;
       }
 
-      const result = await db.run(`
-        INSERT INTO invoices (
-          invoice_number, issue_date, issuer_cuit, receiver_cuit, 
-          cooperative_id, supplier_id, subtotal, iva_amount, total_amount,
-          file_path, original_filename, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente_validacion')
-      `, [
-        invoice_number, issue_date, issuer_cuit, receiver_cuit,
-        coop.id, req.user.id, subtotal, iva_amount, total_amount,
-        req.file.path, req.file.originalname
-      ]);
 
-      if (items && Array.isArray(JSON.parse(items))) {
-        const parsedItems = JSON.parse(items);
-        for (const item of parsedItems) {
-          await db.run(`
-            INSERT INTO invoice_items (invoice_id, description, quantity, unit_price, total_price)
-            VALUES (?, ?, ?, ?, ?)
-          `, [result.lastID, item.description, item.quantity, item.unit_price, item.total_price]);
-        }
+      // Prepare invoice data with nested items if they exist
+      let createData: any = { ...invoiceData };
+      
+      // Remove the original string items field first to avoid conflicts
+      if (createData.items) {
+        delete createData.items;
+      }
+      
+      // Add nested items creation if items exist in the original data
+      if (invoiceData.items && Array.isArray(JSON.parse(invoiceData.items))) {
+        const parsedItems = JSON.parse(invoiceData.items);
+        createData.items = {
+          create: parsedItems.map((item: any) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price
+          }))
+        };
       }
 
-      res.json({
+      const result = await this.invoiceRepository.create(createData);
+
+      res.status(201).json({
         message: 'Factura subida exitosamente',
-        invoice_id: result.lastID,
+        invoice_id: result.id,
         status: 'pendiente_validacion'
       });
     } catch (error) {
@@ -79,16 +97,11 @@ export class InvoiceController {
         res.status(403).json({ error: 'Solo proveedores pueden ver sus facturas' });
         return;
       }
+      
+      const invoices = await this.invoiceRepository.findBySupplier(req.user.id!);
+      const transformedInvoices = transformInvoicesForFrontend(invoices);
 
-      const invoices = await db.all<Invoice & { cooperative_name: string }>(`
-        SELECT i.*, c.name as cooperative_name 
-        FROM invoices i
-        LEFT JOIN cooperatives c ON i.cooperative_id = c.id
-        WHERE i.supplier_id = ?
-        ORDER BY i.created_at DESC
-      `, [req.user.id]);
-
-      res.json(invoices);
+      res.status(200).json(transformedInvoices);
     } catch (error) {
       console.error('Get supplier invoices error:', error);
       res.status(500).json({ error: 'Error al obtener facturas' });
@@ -102,15 +115,10 @@ export class InvoiceController {
         return;
       }
 
-      const invoices = await db.all<Invoice & { supplier_name: string; supplier_contact: string }>(`
-        SELECT i.*, u.company_name as supplier_name, u.full_name as supplier_contact
-        FROM invoices i
-        LEFT JOIN users u ON i.supplier_id = u.id
-        WHERE i.cooperative_id = ? AND i.status IN ('enviada', 'aceptada', 'rechazada')
-        ORDER BY i.sent_at DESC
-      `, [req.user.cooperative_id]);
+      const invoices = await this.invoiceRepository.findByCooperativeId(req.user.cooperative_id!);
+      const transformedInvoices = transformInvoicesForFrontend(invoices);
 
-      res.json(invoices);
+      res.status(200).json(transformedInvoices);
     } catch (error) {
       console.error('Get cooperative invoices error:', error);
       res.status(500).json({ error: 'Error al obtener facturas' });
@@ -127,10 +135,7 @@ export class InvoiceController {
         return;
       }
 
-      const invoice = await db.get<Invoice>(
-        'SELECT * FROM invoices WHERE id = ? AND supplier_id = ?',
-        [id, req.user.id]
-      );
+      const invoice = await this.invoiceRepository.findByIdAndSupplier(Number(id), req.user.id!);
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -142,15 +147,10 @@ export class InvoiceController {
         return;
       }
 
-      const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
-      const values = [...Object.values(updates), new Date().toISOString(), id];
+      // Apply updates and change status to 'enviada'
+      await this.invoiceRepository.validateAndSend(Number(id), updates);
 
-      await db.run(
-        `UPDATE invoices SET ${fields}, status = 'enviada', validated_at = ?, sent_at = ? WHERE id = ?`,
-        [...values, new Date().toISOString()]
-      );
-
-      res.json({ message: 'Factura validada y enviada a cooperativa' });
+      res.status(202).json({ message: 'Factura validada y enviada a cooperativa' });
     } catch (error) {
       console.error('Validate invoice error:', error);
       res.status(500).json({ error: 'Error al validar factura' });
@@ -167,10 +167,12 @@ export class InvoiceController {
         return;
       }
 
-      const invoice = await db.get<Invoice>(
-        'SELECT * FROM invoices WHERE id = ? AND cooperative_id = ?',
-        [id, req.user.cooperative_id]
-      );
+      const invoice = await this.invoiceRepository.findById(Number(id));
+
+      // const invoice = await db.get<Invoice>(
+        // 'SELECT * FROM invoices WHERE id = ? AND cooperative_id = ?',
+        // [id, req.user.cooperative_id]
+      // );
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -184,12 +186,14 @@ export class InvoiceController {
 
       const newStatus = action === 'aceptar' ? 'aceptada' : 'rechazada';
       
-      await db.run(
-        'UPDATE invoices SET status = ?, rejection_reason = ?, responded_at = ? WHERE id = ?',
-        [newStatus, rejection_reason || null, new Date().toISOString(), id]
-      );
+      await this.invoiceRepository.updateStatus(Number(id), newStatus, rejection_reason);
 
-      res.json({
+      // await db.run(
+        // 'UPDATE invoices SET status = ?, rejection_reason = ?, responded_at = ? WHERE id = ?',
+        // [newStatus, rejection_reason || null, new Date().toISOString(), id]
+      // );
+
+      res.status(202).json({
         message: `Factura ${action === 'aceptar' ? 'aceptada' : 'rechazada'} exitosamente`,
         status: newStatus
       });
@@ -203,16 +207,7 @@ export class InvoiceController {
     try {
       const { id } = req.params;
 
-      // Get invoice with supplier and cooperative info
-      const invoice = await db.get<Invoice & { supplier_name: string; cooperative_name: string }>(`
-        SELECT i.*, 
-          u.company_name as supplier_name,
-          c.name as cooperative_name
-        FROM invoices i
-        LEFT JOIN users u ON i.supplier_id = u.id
-        LEFT JOIN cooperatives c ON i.cooperative_id = c.id
-        WHERE i.id = ?
-      `, [id]);
+      const invoice = await this.invoiceRepository.findById(Number(id));
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -221,8 +216,8 @@ export class InvoiceController {
 
       // Check if user has permission to view this invoice
       const hasPermission = 
-        (req.user?.role === 'proveedor' && invoice.supplier_id === req.user.id) ||
-        (req.user?.role === 'admin_coop' && invoice.cooperative_id === req.user.cooperative_id) ||
+        (req.user?.role === 'proveedor' && invoice.supplier?.id === req.user.id) ||
+        (req.user?.role === 'admin_coop' && invoice.cooperative?.id === req.user.cooperative_id) ||
         req.user?.role === 'admin_aca';
 
       if (!hasPermission) {
@@ -230,24 +225,10 @@ export class InvoiceController {
         return;
       }
 
-      // Get invoice items
-      const items = await db.all<InvoiceItem>(
-        'SELECT * FROM invoice_items WHERE invoice_id = ?',
-        [id]
-      );
-
-      // Get invoice attachments
-      const attachments = await db.all<any>(
-        'SELECT id, invoice_id, original_filename, file_size, mime_type, description, created_at FROM invoice_attachments WHERE invoice_id = ?',
-        [id]
-      );
+      const transformedInvoice = transformInvoiceForFrontend(invoice);
 
       // Return invoice with items and attachments
-      res.json({
-        ...invoice,
-        items,
-        attachments
-      });
+      res.status(200).json(transformedInvoice);
 
     } catch (error) {
       console.error('Get invoice error:', error);
@@ -265,10 +246,7 @@ export class InvoiceController {
         return;
       }
 
-      const invoice = await db.get<Invoice>(
-        'SELECT * FROM invoices WHERE id = ? AND supplier_id = ?',
-        [id, req.user.id]
-      );
+      const invoice = await this.invoiceRepository.findByIdAndSupplier(Number(id), req.user.id!);
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -287,23 +265,18 @@ export class InvoiceController {
         const file = req.files[i];
         const description = descriptionsArray[i] || '';
 
-        const result = await db.run(`
-          INSERT INTO invoice_attachments (
-            invoice_id, file_path, original_filename, file_size, mime_type, description
-          ) VALUES (?, ?, ?, ?, ?, ?)
-        `, [
-          id,
-          file.path,
-          file.originalname,
-          file.size,
-          file.mimetype,
-          description
-        ]);
+        const result = await this.invoiceRepository.addAttachment(Number(id), {
+          filePath: file.path,
+          originalFilename: file.originalname,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          description: description
+        });
 
-        attachmentIds.push(result.lastID);
+        attachmentIds.push(result.id);
       }
 
-      res.json({
+      res.status(201).json({
         message: 'Adjuntos subidos exitosamente',
         attachment_ids: attachmentIds,
         count: req.files.length
@@ -319,7 +292,7 @@ export class InvoiceController {
     try {
       const { id, attachmentId } = req.params;
 
-      const invoice = await db.get<Invoice>('SELECT * FROM invoices WHERE id = ?', [id]);
+      const invoice = await this.invoiceRepository.findById(Number(id));
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -327,8 +300,8 @@ export class InvoiceController {
       }
 
       const hasPermission = 
-        (req.user?.role === 'proveedor' && invoice.supplier_id === req.user.id) ||
-        (req.user?.role === 'admin_coop' && invoice.cooperative_id === req.user.cooperative_id) ||
+        (req.user?.role === 'proveedor' && invoice.supplier?.id === req.user.id) ||
+        (req.user?.role === 'admin_coop' && invoice.cooperative?.id === req.user.cooperative_id) ||
         req.user?.role === 'admin_aca';
 
       if (!hasPermission) {
@@ -336,22 +309,19 @@ export class InvoiceController {
         return;
       }
 
-      const attachment = await db.get<any>(
-        'SELECT * FROM invoice_attachments WHERE id = ? AND invoice_id = ?',
-        [attachmentId, id]
-      );
+      const attachment = await this.invoiceRepository.findAttachment(Number(attachmentId), Number(id));
 
       if (!attachment) {
         res.status(404).json({ error: 'Adjunto no encontrado' });
         return;
       }
 
-      if (!fs.existsSync(attachment.file_path)) {
+      if (!fs.existsSync(attachment.filePath)) {
         res.status(404).json({ error: 'Archivo no encontrado en el servidor' });
         return;
       }
 
-      res.download(attachment.file_path, attachment.original_filename);
+      res.download(attachment.filePath, attachment.originalFilename);
     } catch (error) {
       console.error('Download attachment error:', error);
       res.status(500).json({ error: 'Error al descargar adjunto' });
@@ -367,20 +337,14 @@ export class InvoiceController {
         return;
       }
 
-      const invoice = await db.get<Invoice>(
-        'SELECT * FROM invoices WHERE id = ? AND supplier_id = ?',
-        [id, req.user.id]
-      );
+      const invoice = await this.invoiceRepository.findByIdAndSupplier(Number(id), req.user.id!);
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
         return;
       }
 
-      const attachment = await db.get<any>(
-        'SELECT * FROM invoice_attachments WHERE id = ? AND invoice_id = ?',
-        [attachmentId, id]
-      );
+      const attachment = await this.invoiceRepository.findAttachment(Number(attachmentId), Number(id));
 
       if (!attachment) {
         res.status(404).json({ error: 'Adjunto no encontrado' });
@@ -388,14 +352,14 @@ export class InvoiceController {
       }
 
       // Delete file from filesystem
-      if (fs.existsSync(attachment.file_path)) {
-        fs.unlinkSync(attachment.file_path);
+      if (fs.existsSync(attachment.filePath)) {
+        fs.unlinkSync(attachment.filePath);
       }
 
       // Delete from database
-      await db.run('DELETE FROM invoice_attachments WHERE id = ?', [attachmentId]);
+      await this.invoiceRepository.deleteAttachment(Number(attachmentId));
 
-      res.json({ message: 'Adjunto eliminado exitosamente' });
+      res.status(200).json({ message: 'Adjunto eliminado exitosamente' });
     } catch (error) {
       console.error('Delete attachment error:', error);
       res.status(500).json({ error: 'Error al eliminar adjunto' });
@@ -406,12 +370,13 @@ export class InvoiceController {
     try {
       const { id } = req.params;
 
-      const items = await db.all<InvoiceItem>(
-        'SELECT * FROM invoice_items WHERE invoice_id = ?',
-        [id]
-      );
+      const items = await this.invoiceRepository.findById(Number(id)).then(inv => inv?.items || []);
+      // const items = await db.all<InvoiceItem>(
+        // 'SELECT * FROM invoice_items WHERE invoice_id = ?',
+        // [id]
+      // );
 
-      res.json(items);
+      res.status(200).json(items);
     } catch (error) {
       console.error('Get invoice items error:', error);
       res.status(500).json({ error: 'Error al obtener items' });
@@ -425,25 +390,26 @@ export class InvoiceController {
         return;
       }
 
-      const invoices = await db.all<Invoice & { supplier_name: string }>(`
-        SELECT 
-          i.invoice_number,
-          i.issue_date,
-          i.issuer_cuit,
-          i.receiver_cuit,
-          i.subtotal,
-          i.iva_amount,
-          i.total_amount,
-          u.company_name as supplier_name
-        FROM invoices i
-        LEFT JOIN users u ON i.supplier_id = u.id
-        WHERE i.cooperative_id = ? AND i.status = 'aceptada'
-        ORDER BY i.issue_date DESC
-      `, [req.user.cooperative_id]);
+      const invoices = await this.invoiceRepository.getAcceptedByCooperative(req.user.cooperative_id!);
+      // const invoices = await db.all<Invoice & { supplier_name: string }>(`
+        // SELECT 
+          // i.invoice_number,
+          // i.issue_date,
+          // i.issuer_cuit,
+          // i.receiver_cuit,
+          // i.subtotal,
+          // i.iva_amount,
+          // i.total_amount,
+          // u.company_name as supplier_name
+        // FROM invoices i
+        // LEFT JOIN users u ON i.supplier_id = u.id
+        // WHERE i.cooperative_id = ? AND i.status = 'aceptada'
+        // ORDER BY i.issue_date DESC
+      // `, [req.user.cooperative_id]);
 
       const csvHeader = 'Numero Factura,Fecha,CUIT Emisor,CUIT Receptor,Subtotal,IVA,Total,Proveedor\n';
       const csvRows = invoices.map(inv => 
-        `${inv.invoice_number},${inv.issue_date},${inv.issuer_cuit},${inv.receiver_cuit},${inv.subtotal},${inv.iva_amount},${inv.total_amount},"${inv.supplier_name}"`
+        `${inv.invoiceNumber},${inv.issueDate},${inv.issuerCuit},${inv.receiverCuit},${inv.subtotal},${inv.ivaAmount},${inv.totalAmount},"${inv.supplier?.companyName}"`
       ).join('\n');
 
       const csvContent = csvHeader + csvRows;
@@ -461,7 +427,8 @@ export class InvoiceController {
     try {
       const { id } = req.params;
 
-      const invoice = await db.get<Invoice>('SELECT * FROM invoices WHERE id = ?', [id]);
+      const invoice = await this.invoiceRepository.findById(Number(id));
+      // const invoice = await db.get<Invoice>('SELECT * FROM invoices WHERE id = ?', [id]);
 
       if (!invoice) {
         res.status(404).json({ error: 'Factura no encontrada' });
@@ -469,8 +436,8 @@ export class InvoiceController {
       }
 
       const hasPermission = 
-        (req.user?.role === 'proveedor' && invoice.supplier_id === req.user.id) ||
-        (req.user?.role === 'admin_coop' && invoice.cooperative_id === req.user.cooperative_id) ||
+        (req.user?.role === 'proveedor' && invoice.supplierId === req.user.id) ||
+        (req.user?.role === 'admin_coop' && invoice.cooperativeId === req.user.cooperative_id) ||
         req.user?.role === 'admin_aca';
 
       if (!hasPermission) {
@@ -478,12 +445,12 @@ export class InvoiceController {
         return;
       }
 
-      if (!invoice.file_path || !fs.existsSync(invoice.file_path)) {
+      if (!invoice.filePath || !fs.existsSync(invoice.filePath)) {
         res.status(404).json({ error: 'Archivo no encontrado en el servidor' });
         return;
       }
 
-      res.download(invoice.file_path, invoice.original_filename || 'factura.pdf');
+      res.download(invoice.filePath, invoice.originalFilename || 'factura.pdf');
     } catch (error) {
       console.error('Download invoice error:', error);
       res.status(500).json({ error: 'Error al descargar factura' });
@@ -513,12 +480,12 @@ export class InvoiceController {
       };
 
       // URL del endpoint de Power Automate
-      const powerAutomateUrl = 'https://defaulta7cad06884854149bb950f323bdfa8.9e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/249d4f021fe64a0ca536cc507aa2715a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pd9Gcfkg34yDr8Bmhd7z038JqLRtH5akRhvirdnwRUY';
+      const PAURL = powerAutomateUrl || '';
 
       console.log('Enviando factura a Power Automate:', req.file.originalname);
       
       // Enviar a Power Automate
-      const response = await axios.post(powerAutomateUrl, powerAutomateData, {
+      const response = await axios.post(PAURL, powerAutomateData, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -532,7 +499,7 @@ export class InvoiceController {
         fs.unlinkSync(req.file.path);
       }
 
-      res.json({
+      res.status(200).json({
         message: 'Factura enviada exitosamente a Power Automate',
         powerAutomateResponse: response.data,
         status: response.status

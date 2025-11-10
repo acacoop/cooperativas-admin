@@ -1,15 +1,24 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import db from '../config/database';
-import { User, JWTPayload } from '../types';
+import { PrismaClient } from '../generated/prisma';
+import { UserRepository } from '../models/repositories/UserRepository';
+import { JWTPayload, UserRole } from '../types';
 
 export class AuthController {
-  public async login(req: Request, res: Response): Promise<void> {
+  private userRepository: UserRepository;
+
+  constructor() {
+    const prisma = new PrismaClient();
+    this.userRepository = new UserRepository(prisma);
+  }
+
+  public login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { username, password } = req.body;
 
-      const user = await db.get<User>('SELECT * FROM users WHERE username = ?', [username]);
+      // Use UserRepository instead of direct database query
+      const user = await this.userRepository.findByUsername(username);
 
       if (!user || !(await bcrypt.compare(password, user.password))) {
         res.status(401).json({ error: 'Credenciales inválidas' });
@@ -19,8 +28,8 @@ export class AuthController {
       const payload: JWTPayload = {
         id: user.id,
         username: user.username,
-        role: user.role,
-        cooperative_id: user.cooperative_id
+        role: user.role as UserRole,
+        cooperative_id: user.cooperativeId || undefined
       };
 
       const token = jwt.sign(
@@ -36,12 +45,12 @@ export class AuthController {
           username: user.username,
           email: user.email,
           role: user.role,
-          cooperative_id: user.cooperative_id
+          cooperative_id: user.cooperativeId || undefined
         }
       });
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Error del servidor' });
     }
-  }
+  };
 }
